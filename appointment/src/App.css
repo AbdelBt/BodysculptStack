@@ -1,0 +1,17 @@
+.disabled-day {
+    color: red;
+    text-decoration: line-through;
+  }
+  .react-tel-input .form-control{
+    width: 100% !important;
+    border-color: hsl(var(--input)) !important;
+  }
+
+
+  tbody tr{
+    justify-content: space-between;
+  }
+  thead tr{
+    justify-content: space-between;
+
+  }

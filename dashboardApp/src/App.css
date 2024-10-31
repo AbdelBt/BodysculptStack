@@ -1,0 +1,91 @@
+
+#root {
+  margin: 0 auto;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+.App{
+  background-color: hsl(224, 71.4%, 4.1%);
+  width: 100%;
+  justify-content: space-between;
+}
+
+.status-cell {
+  text-transform: capitalize;
+}
+
+.status-cell.pending {
+  background-color: orange;
+  font-weight: 600;
+
+}
+.fc .fc-toolbar-title {
+  font-size: 14px;
+}
+
+.status-cell.confirmed {
+  background-color: green;
+  font-weight: 600;
+
+}
+
+.status-cell.cancelled {
+  background-color: red;
+  font-weight: 600;
+
+}
+
+.fc-list-day-cushion{
+  background-color: #7c3aed !important;
+}
+
+.fc-event-main{
+  background-color: #7c3aed !important;
+
+}
+
+tr.fc-list-event:hover{
+  cursor: pointer;
+}
+
+.fc-daygrid-event-harness:hover{
+  cursor: pointer;
+  background-color: #7c3aed !important;
+  border-radius: 20px;
+}
+
+th{
+  text-align: center !important;
+}
+
+.react-tel-input .form-control {
+  width: 100% !important
+}
+
+.sideb{
+  background-image: url(./assets/Fichier1.png);
+  background-position: left bottom;
+  background-size: 100%;
+  background-repeat: no-repeat;
+}
+
+tbody tr{
+  justify-content: space-between;
+}
+thead tr{
+  justify-content: space-between;
+
+}
