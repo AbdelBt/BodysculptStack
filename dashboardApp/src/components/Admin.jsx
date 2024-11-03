@@ -41,7 +41,7 @@ const Admin = () => {
     e.preventDefault();
     try {
       // Appel à l'API pour créer un compte
-      await axios.post("https://appointment-fr-12d3.onrender.com/user/signup", {
+      await axios.post("https://bodysculptstack.onrender.com/user/signup", {
         email,
         password,
       });
@@ -63,7 +63,7 @@ const Admin = () => {
   const fetchServices = async () => {
     try {
       const response = await axios.get(
-        "https://appointment-fr-12d3.onrender.com/services"
+        "https://bodysculptstack.onrender.com/services"
       );
       setServices(response.data);
     } catch (error) {
@@ -82,7 +82,7 @@ const Admin = () => {
     }
 
     try {
-      await axios.post("https://appointment-fr-12d3.onrender.com/services", {
+      await axios.post("https://bodysculptstack.onrender.com/services", {
         name: newService,
       });
       fetchServices();
@@ -99,9 +99,7 @@ const Admin = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(
-        `https://appointment-fr-12d3.onrender.com/services/${id}`
-      );
+      await axios.delete(`https://bodysculptstack.onrender.com/services/${id}`);
       setServices(services.filter((service) => service.id !== id));
       console.log(services.filter((service) => service.id !== id));
       toast({

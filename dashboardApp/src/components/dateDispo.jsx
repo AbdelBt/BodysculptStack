@@ -25,7 +25,7 @@ export function DatePickerWithRange({ className, onSelect }) {
   const fetchAvailableDates = async () => {
     try {
       const response = await axios.get(
-        "https://appointment-fr-12d3.onrender.com/available-dates"
+        "https://bodysculptstack.onrender.com/available-dates"
       );
       setAvailableDates(response.data);
       if (response.data.length > 0) {

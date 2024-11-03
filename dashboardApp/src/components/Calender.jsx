@@ -44,7 +44,7 @@ export default function Calendar() {
   const fetchReservations = async () => {
     try {
       const response = await fetch(
-        "https://appointment-fr-12d3.onrender.com/reserve"
+        "https://bodysculptstack.onrender.com/reserve"
       ); // Assurez-vous que l'URL correspond à votre configuration backend
       const data = await response.json();
       const formattedEvents = data.reservations.map((reservation) => ({

@@ -45,7 +45,7 @@ export default function MyAvailabilities() {
   const fetchDays = async (email) => {
     try {
       const response = await axios.get(
-        `https://appointment-fr-12d3.onrender.com/employee/days`,
+        `https://bodysculptstack.onrender.com/employee/days`,
         {
           params: {
             email: email,
@@ -65,7 +65,7 @@ export default function MyAvailabilities() {
   const fetchDaysOff = async (email) => {
     try {
       const response = await axios.get(
-        `https://appointment-fr-12d3.onrender.com/employee/days-off`,
+        `https://bodysculptstack.onrender.com/employee/days-off`,
         {
           params: {
             email: email,
@@ -97,7 +97,7 @@ export default function MyAvailabilities() {
     const to_date_plus_one = addOneDay(dateRange.to);
 
     try {
-      await axios.post("https://appointment-fr-12d3.onrender.com/employee", {
+      await axios.post("https://bodysculptstack.onrender.com/employee", {
         from_date: from_date_plus_one,
         to_date: to_date_plus_one,
         employee_email: JSON.parse(sessionStorage.getItem("user")).email,
@@ -139,14 +139,11 @@ export default function MyAvailabilities() {
     }));
 
     try {
-      await axios.post(
-        "https://appointment-fr-12d3.onrender.com/employee/days",
-        {
-          email: JSON.parse(sessionStorage.getItem("user")).email,
-          day_of_week: day,
-          available: updatedState,
-        }
-      );
+      await axios.post("https://bodysculptstack.onrender.com/employee/days", {
+        email: JSON.parse(sessionStorage.getItem("user")).email,
+        day_of_week: day,
+        available: updatedState,
+      });
       toast({
         description: `Day ${
           updatedState ? "added to" : "removed from"
@@ -201,7 +198,7 @@ export default function MyAvailabilities() {
     try {
       // Envoyer la date de congé au backend pour l'ajouter
       await axios.post(
-        "https://appointment-fr-12d3.onrender.com/employee/days-off",
+        "https://bodysculptstack.onrender.com/employee/days-off",
         {
           email: JSON.parse(sessionStorage.getItem("user")).email,
           day_off_date: adjustedDayOffDate, // Utilisation de la date sélectionnée
@@ -229,7 +226,7 @@ export default function MyAvailabilities() {
   const handleDeleteDayOff = async (dayOffId) => {
     try {
       await axios.delete(
-        `https://appointment-fr-12d3.onrender.com/employee/days-off/${dayOffId}`
+        `https://bodysculptstack.onrender.com/employee/days-off/${dayOffId}`
       );
       toast({
         description: `Day off deleted successfully`,

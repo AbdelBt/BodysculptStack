@@ -34,7 +34,7 @@ function Login({ setIsAuthenticated }) {
     e.preventDefault();
     try {
       const response = await fetch(
-        "https://appointment-fr-12d3.onrender.com/user/login",
+        "https://bodysculptstack.onrender.com/user/login",
         {
           method: "POST",
           headers: {

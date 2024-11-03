@@ -57,14 +57,14 @@ function App() {
   const fetchDays = async () => {
     try {
       const response = await axios.get(
-        "https://appointment-fr-12d3.onrender.com/indisponibilities"
+        "https://bodysculptstack.onrender.com/indisponibilities"
       );
       if (response.data.length > 0) {
         // eslint-disable-next-line no-unused-vars
         const { id, ...days } = response.data[0]; // Exclure l'ID
         setDays(days); // Mettre à jour l'état avec les jours non disponibles
         const availableDatesResponse = await axios.get(
-          "https://appointment-fr-12d3.onrender.com/available-dates"
+          "https://bodysculptstack.onrender.com/available-dates"
         );
         if (availableDatesResponse.data.length > 0) {
           let { from_date, to_date } = availableDatesResponse.data[0];
@@ -85,7 +85,7 @@ function App() {
   const fetchUnavailableDays = async () => {
     try {
       const response = await axios.get(
-        "https://appointment-fr-12d3.onrender.com/reserve"
+        "https://bodysculptstack.onrender.com/reserve"
       );
       const { reservations, employeeIds } = response.data;
       const filteredEmployeeIds = employeeIds.filter((id) => id); // Supprime les valeurs null, undefined et vides
@@ -100,7 +100,7 @@ function App() {
   const fetchEmployeeDaysoffWeek = async () => {
     try {
       const response = await axios.get(
-        "https://appointment-fr-12d3.onrender.com/employee/days/all"
+        "https://bodysculptstack.onrender.com/employee/days/all"
       );
       const daysOffWeekData = response.data;
 
@@ -122,7 +122,7 @@ function App() {
   const fetchEmployeeAvailablePeriods = async () => {
     try {
       const response = await axios.get(
-        "https://appointment-fr-12d3.onrender.com/employee/all"
+        "https://bodysculptstack.onrender.com/employee/all"
       );
       const availablePeriodsData = response.data;
 
@@ -150,7 +150,7 @@ function App() {
   const fetchEmployeeDaysOff = async () => {
     try {
       const response = await axios.get(
-        "https://appointment-fr-12d3.onrender.com/employee/days-off/all"
+        "https://bodysculptstack.onrender.com/employee/days-off/all"
       );
       const daysOffData = response.data.daysOff;
 
@@ -178,7 +178,7 @@ function App() {
       if (window.location.href.includes("success")) {
         try {
           const response = await axios.get(
-            `https://appointment-fr-12d3.onrender.com/success?session_id=${sessionId}`
+            `https://bodysculptstack.onrender.com/success?session_id=${sessionId}`
           );
           const reservationData = response.data.reservation;
 
@@ -202,7 +202,7 @@ function App() {
           if (!reservationCompleted) {
             // Soumettre la réservation au backend
             await axios.post(
-              "https://appointment-fr-12d3.onrender.com/reserve",
+              "https://bodysculptstack.onrender.com/reserve",
               reservationData
             );
             // Mettre à jour reservationCompleted dans sessionStorage
@@ -270,7 +270,7 @@ function App() {
     const fetchServices = async () => {
       try {
         const response = await axios.get(
-          "https://appointment-fr-12d3.onrender.com/services"
+          "https://bodysculptstack.onrender.com/services"
         );
         setServices(response.data);
       } catch (error) {
@@ -285,12 +285,12 @@ function App() {
     try {
       // Récupérer les horaires de travail depuis le backend
       const response = await axios.get(
-        "https://appointment-fr-12d3.onrender.com/available-dates/working-hours"
+        "https://bodysculptstack.onrender.com/available-dates/working-hours"
       );
       const workingHours = response.data;
 
       const specialDaysResponse = await axios.get(
-        "https://appointment-fr-12d3.onrender.com/available-dates/special-days"
+        "https://bodysculptstack.onrender.com/available-dates/special-days"
       );
       const specialDays = specialDaysResponse.data;
 
@@ -524,7 +524,7 @@ function App() {
 
     try {
       const sessionResponse = await axios.post(
-        "https://appointment-fr-12d3.onrender.com/create-checkout-session",
+        "https://bodysculptstack.onrender.com/create-checkout-session",
         {
           reservationData: {
             service: service,

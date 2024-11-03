@@ -45,7 +45,7 @@ export function DatePickerWithRange({
   const fetchAvailableDates = async (email) => {
     try {
       const response = await axios.get(
-        `https://appointment-fr-12d3.onrender.com/employee?employee_email=${email}`
+        `https://bodysculptstack.onrender.com/employee?employee_email=${email}`
       );
       setAvailableDates(response.data);
       if (response.data.length > 0) {
@@ -71,14 +71,11 @@ export function DatePickerWithRange({
       [day]: updatedState,
     }));
     try {
-      await axios.post(
-        "https://appointment-fr-12d3.onrender.com/employee/days",
-        {
-          employee_email: JSON.parse(sessionStorage.getItem("user")).email,
-          day_of_week: day,
-          available: updatedState,
-        }
-      );
+      await axios.post("https://bodysculptstack.onrender.com/employee/days", {
+        employee_email: JSON.parse(sessionStorage.getItem("user")).email,
+        day_of_week: day,
+        available: updatedState,
+      });
       toast({
         description: `Day ${
           updatedState ? "added to" : "removed from"
@@ -103,7 +100,7 @@ export function DatePickerWithRange({
         return;
       }
       await axios.post(
-        "https://appointment-fr-12d3.onrender.com/employee/delete-availability",
+        "https://bodysculptstack.onrender.com/employee/delete-availability",
         {
           email: userId, // Utilisation de l'ID de l'utilisateur pour la suppression
         }
