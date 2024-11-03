@@ -129,7 +129,7 @@ router.post("/", async (req, res) => {
         // Configurer l'e-mail de confirmation
         const mailOptions = {
             from: {
-                name: "House Of Beauty",
+                name: "Body Sculpt By Maya",
                 address: "abdella.boutaarourt@hotmail.com"
             },
             to: clientEmail,
@@ -147,7 +147,7 @@ router.post("/", async (req, res) => {
           <li>Description : ${description}</li>
         </ul>
         <p>Merci de nous avoir choisis.</p>
-        <p>Cordialement,<br>L'equipe House Of Beauty</p>
+        <p>Cordialement,<br>L'equipe Body Sculpt By Maya</p>
           <div style="text-align: center; ">
           <img src="https://i.goopics.net/lr3a9d.png" alt="Logo" style="max-width: 200px;">
         </div>
@@ -223,7 +223,7 @@ router.post("/appointment", async (req, res) => {
 
         const mailOptions = {
             from: {
-                name: "House Of Beauty",
+                name: "Body Sculpt By Maya",
                 address: "abdella.boutaarourt@hotmail.com"
             },
             to: clientEmail,
@@ -241,7 +241,7 @@ router.post("/appointment", async (req, res) => {
                   <li>Description : ${description}</li>
                 </ul>
                 <p>Merci de nous avoir choisis.</p>
-                <p>Cordialement,<br>L'équipe House Of Beauty</p>
+                <p>Cordialement,<br>L'équipe Body Sculpt By Maya</p>
                 <div style="text-align: center;">
                   <img src="https://i.goopics.net/lr3a9d.png" alt="Logo" style="max-width: 200px;">
                 </div>
@@ -351,7 +351,7 @@ router.post("/:id/status", async (req, res) => {
             // Configurer l'e-mail d'annulation
             const cancelMailOptions = {
                 from: {
-                    name: "House Of Beauty",
+                    name: "Body Sculpt By Maya",
                     address: "abdella.boutaarourt@hotmail.com"
                 },
                 to: currentReservation.client_email,
@@ -362,7 +362,7 @@ router.post("/:id/status", async (req, res) => {
                             <h1>Bonjour ${currentReservation.client_firstname} ${currentReservation.client_name}</h1>
                             <p>Votre réservation pour ${currentReservation.service} le ${currentReservation.date} à ${currentReservation.time_slot} a été annulée.</p>
                             <p>Merci de nous avoir prévenus.</p>
-                            <p>Cordialement,<br>L'équipe House Of Beauty</p>
+                            <p>Cordialement,<br>L'équipe Body Sculpt By Maya</p>
                             <div style="text-align: center;">
                                 <img src="https://i.goopics.net/lr3a9d.png" alt="Logo" style="max-width: 200px;">
                             </div>
