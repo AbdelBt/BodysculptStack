@@ -113,7 +113,8 @@ app.get('/success', async (req, res) => {
 app.get('/', async (req, res) => {
     res.send('Hello, Backend!');
 });
-// Start the server
+
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

@@ -28,12 +28,12 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Route POST pour créer un compte utilisateur
+// Route POST to create a user account
 router.post('/signup', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // Créer un utilisateur avec Supabase Auth
+        // Create a user with Supabase Auth
         const { user, error } = await supabase.auth.signUp({
             email,
             password,
@@ -43,14 +43,31 @@ router.post('/signup', async (req, res) => {
             throw error;
         }
 
-        // Vous pouvez ajouter d'autres traitements ici, comme l'envoi de courriels de vérification, etc.
+        // Define weekdays array
+        const weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+        // Set each weekday as unavailable for the new user
+        const { error: insertError } = await supabase
+            .from('employee_days')
+            .insert(weekdays.map(day => ({
+                employee_email: email,
+                day_of_week: day,
+                available: false,
+            })));
+
+        if (insertError) {
+            throw insertError;
+        }
 
         res.status(201).json({ message: 'User created successfully', user });
     } catch (error) {
-        console.error('Error creating user:', error.message);
-        res.status(500).json({ error: 'Failed to create user' });
+        console.error('Error creating user or initializing availability:', error.message);
+        res.status(500).json({ error: 'Failed to create user and initialize availability' });
     }
 });
+
+
+
 
 // Route GET pour récupérer tous les utilisateurs
 router.get('/users', async (req, res) => {

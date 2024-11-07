@@ -314,8 +314,7 @@ export default function Sidebar({ handleLogout }) {
       return false; // Gérer le cas où les jours de congé des employés ne sont pas disponibles
     }
 
-    // Tableau pour stocker les employés disponibles
-    const availableEmployees = []; // Ajouté
+    const availableEmployees = [];
 
     // Vérifier si le créneau est indisponible pour chaque employé
     const isAnyEmployeeAvailable = employeeIds.some((employeeId) => {
