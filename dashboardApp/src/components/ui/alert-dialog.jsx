@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
-import backgroundImage from "../../assets/imagee.png";
+import backgroundImage from "../../assets/Logo.png";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -36,6 +36,8 @@ const AlertDialogContent = React.forwardRef(({ className, ...props }, ref) => (
       )}
       style={{
         backgroundImage: `url(${backgroundImage})`,
+        backgroundPositionX: "200px",
+        backgroundSize: "70%",
       }}
       {...props}
     />
