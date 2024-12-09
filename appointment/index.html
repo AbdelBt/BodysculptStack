@@ -6,8 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- Primary Meta Tags -->
-  <title>House Of Beauty</title>
-  <meta name="title" content="House Of Beauty By Maya">
+  <title>Body Sculpt By Maya</title>
+  <meta name="title" content="Body Sculpt By Maya">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="libs/swiper-bundle.min.css" />
+  <link rel="stylesheet" href="style.css">
+
+  <link rel="stylesheet" href="assets/fonts/style.css">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,12 +28,12 @@
     crossorigin="anonymous" referrerpolicy="no-referrer" />
 
   <!-- Favicons -->
-  <link rel="shortcut icon" href="./assets/Fichier1-CrvUN79B.png" type="image/x-icon">
-  <link rel="icon" href="/assets/Fichier1-CrvUN79B.png" type="image/x-icon">
+  <link rel="shortcut icon" href="assets/images/Logo.png" type="image/x-icon">
+  <link rel="icon" href="assets/images/Logo.png" type="image/x-icon">
   <meta name="msapplication-TileColor" content="#69B99D">
   <meta name="theme-color" content="#69B99D">
-  <script type="module" crossorigin src="./assets/index-EBEgnejA.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-Ch8fK9Iy.css">
+  <link rel="stylesheet" crossorigin href="./style.css">
+
 </head>
 
 <body>
@@ -36,13 +42,14 @@
     <div id="root"></div>
 
     <nav class="container">
-      <a class="logo" href="#">House Of <span>Beauty</span></a>
+      <a class="logo" href="#">Body Sculpt <span>By Maya</span></a>
       <div class="menu">
         <ul class="grid">
           <li><a class="title active" href="#home">Accueil</a></li>
           <li class="serv"><a class="title serv" href="#">Services</a>
             <div class="dropdwn">
               <ul>
+                <li><a href="eye.html">booster eyes</a></li>
                 <li><a href="cellulite.html"> anti-cellulite</a></li>
                 <li><a href="vergeture.html">traitement nskin vergetures
                   </a></li>
@@ -68,10 +75,10 @@
     <section class="section" id="home">
       <div class="container grid">
         <div class="image">
-          <img src="./assets/sld-4-DlIoYcAN.jpg" alt="">
+          <img src="assets/images/sld-4.jpg" alt="">
         </div>
         <div class="text">
-          <h1 class="title" style="font-size: 40px;">House Of Beauty</h1>
+          <h1 class="title" style="font-size: 40px;">Body Sculpt By Maya</h1>
           <a class="button" href="#" id="myButton">RÉSERVER MAINTENANT
             !</a>
         </div>
@@ -84,13 +91,13 @@
     <section class="section" id="about">
       <div class="container grid">
         <div class="image">
-          <img src="./assets/Fichier1-CrvUN79B.png" alt="">
+          <img src="assets/images/Logo.png" alt="">
         </div>
         <div class="text">
           <h2 class="title">À Propos de Nous</h2>
-          <p>Chez House Of Beauty, nous nous engageons à révolutionner les soins de la peau. Nos traitements sur mesure
+          <p>Chez Body Sculpt, nous nous engageons à révolutionner les soins de la peau. Nos traitements sur mesure
             ciblent les vergetures, la cellulite et le raffermissement de la peau avec précision et innovation.
-            Découvrez le pouvoir transformateur de House Of Beauty et embarquez pour un voyage vers une peau plus
+            Découvrez le pouvoir transformateur de Body Sculpt By Maya et embarquez pour un voyage vers une peau plus
             radieuse et plus saine dès aujourd'hui.
           </p>
           <p> Grâce à des techniques avancées et à des recherches de pointe, nous veillons à ce que chaque traitement
@@ -114,9 +121,24 @@
         </header>
         <div class="cards grid">
           <div class="card">
+            <a href="eye.html">
+              <div class="card-image">
+                <img src="./assets/images/contact.jpg" alt="" style="opacity: 0.3;">
+              </div>
+              <i class="icon-cosmetic"></i>
+              <h3 class="title">TRAITEMENT BOOSTER EYES </h3>
+              <p>Le booster Eyes, à base de polynucléotides, répare, hydrate et lisse la peau tout en réduisant cernes
+                et ridules. </p>
+              <div class="hover-content">
+                <p>En Savoir Plus</p>
+              </div>
+            </a>
+          </div>
+
+          <div class="card">
             <a href="vergeture.html">
               <div class="card-image">
-                <img src="./assets/Camouflage-definitif-des-vergetures-Vt10YCrp.png" alt="">
+                <img src="./assets/images/Camouflage-definitif-des-vergetures.png" alt="">
               </div>
               <i class="icon-cosmetic"></i>
               <h3 class="title">TRAITEMENT NSKIN VERGETURES </h3>
@@ -130,7 +152,7 @@
           <div class="card">
             <a href="cellulite.html">
               <div class="card-image">
-                <img src="./assets/Fichier%202-Bjfcx-dO.png" alt="">
+                <img src="./assets/images/Fichier 2.png" alt="">
               </div>
               <i class="icon-cosmetic"></i>
               <h3 class="title">ANTI-CELLULITE NSKIN</h3>
@@ -145,7 +167,7 @@
           <div class="card">
             <a href="dissolution.html">
               <div class="card-image">
-                <img src="./assets/dissoOpa-BPmrHdnK.png" alt="" style="background-color: rgba(255, 255, 255, 0.63)">
+                <img src="./assets/images/dissoOpa.png" alt="" style="background-color: rgba(255, 255, 255, 0.63)">
               </div>
               <i class=" icon-cosmetic"></i>
               <h3 class="title">DISSOLUTION DE GRAISSE NSKIN</h3>
@@ -203,7 +225,7 @@
               <blockquote>
                 <p>
                   <span>&ldquo;</span>
-                  Grâce à House Of Beauty, j'ai vu une amélioration incroyable de l'apparence de mes vergetures. Les
+                  Grâce à bodysculpt, j'ai vu une amélioration incroyable de l'apparence de mes vergetures. Les
                   résultats sont vraiment spectaculaires.
                 </p>
                 <cite>
@@ -231,7 +253,7 @@
                 <p>
                   <span>&ldquo;</span>
                   Je suis absolument ravie des résultats. Ma peau est plus lisse, plus ferme et visiblement plus jeune.
-                  Merci House Of Beauty
+                  Merci bodysculptbymaya
                 </p>
                 <cite>
                   <img src="/assets/image%20(3)-ChMuLSNb.png" alt="Foto">
@@ -254,7 +276,7 @@
       <div class="container grid">
         <div class="text">
           <h2 class="title">Contactez-nous!</h2>
-          <p>Contactez House Of Beauty By Maya, nous voulons répondre à vos questions, entendre vos critiques et
+          <p>Contactez Body Sculpt By Maya, nous voulons répondre à vos questions, entendre vos critiques et
             suggestions.
           </p>
           <a href="https://wa.me/+32466265748" target="_blank" class="button"><i class="icon-whatsapp"></i>WhatsApp
@@ -265,8 +287,8 @@
             <li><i class="icon-phone"></i> +32 466 265 748</li>
             <!--<li><i class="icon-map-pin"></i>Al Wathba Mall shop 32 Baniyas, Abu Dabi</li>-->
             <li>
-              <a href="mailto:houseofbeautybm@outlook.com">
-                <i class="icon-mail"></i> houseofbeautybm@outlook.com
+              <a href="mailto:bodysculptbymayaa@outlook.com" style="display: flex;align-items: center;color: black;">
+                <i class="icon-mail"></i> bodysculptbymayaa@outlook.com
               </a>
             </li>
           </ul>
@@ -279,16 +301,16 @@
   <footer class="section">
     <div class="container grid">
       <div class="brand">
-        <a class="logo logo-alt" href="#home">House Of Beauty
+        <a class="logo logo-alt" href="#home">Body Sculpt
           <span>By Maya</span>.</a>
-        <p>2024 House Of Beauty</p>
+        <p>2024 Body Sculpt By Maya</p>
         <p> All rights reserved</p>
       </div>
       <img src="/assets/Fichier1-CrvUN79B.png" alt="" style="width: 12vh;">
       <div class="social">
         <a href="https://www.instagram.com/frenchbeautyhm/" target="_blank" style="display: flex; align-items: center;">
           <i class="icon-instagram"></i> <!-- Icône Instagram -->
-          <span style="padding-right: 5px;">House Of Beauty</span> <!-- Texte -->
+          <span style="padding-right: 5px;">Body Sculpt By Maya</span> <!-- Texte -->
         </a>
       </div>
     </div>
