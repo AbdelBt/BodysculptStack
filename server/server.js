@@ -58,8 +58,8 @@ app.post('/create-checkout-session', async (req, res) => {
                 },
             ],
             mode: 'payment',
-            success_url: `https://houseofbeautybymaya.netlify.app/success?session_id={CHECKOUT_SESSION_ID}`, // URL de succès avec session ID
-            cancel_url: 'https://houseofbeautybymaya.netlify.app/cancel', // URL d'annulation
+            success_url: `https://bodysculptbymaya.com//success?session_id={CHECKOUT_SESSION_ID}`, // URL de succès avec session ID
+            cancel_url: 'https://bodysculptbymaya.com//cancel', // URL d'annulation
             metadata: {
                 reservationData: JSON.stringify(reservationData),
             },
