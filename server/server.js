@@ -49,7 +49,7 @@ app.post('/create-checkout-session', async (req, res) => {
                         currency,
                         product_data: {
                             name: `Reservation: ${reservationData.service}`,
-                            images: ['https://i.imgur.com/g5EmQ1z.png'], // URL de votre logo
+                            images: ['https://i.imgur.com/g5EmQ1z.png'],
 
                         },
                         unit_amount: amount,
@@ -58,8 +58,8 @@ app.post('/create-checkout-session', async (req, res) => {
                 },
             ],
             mode: 'payment',
-            success_url: `https://bodysculptbymaya.com//success?session_id={CHECKOUT_SESSION_ID}`, // URL de succès avec session ID
-            cancel_url: 'https://bodysculptbymaya.com//cancel', // URL d'annulation
+            success_url: `https://bodysculptbymaya.com/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: 'https://bodysculptbymaya.com/cancel',
             metadata: {
                 reservationData: JSON.stringify(reservationData),
             },
