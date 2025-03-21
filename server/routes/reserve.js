@@ -85,13 +85,6 @@ router.post("/", async (req, res) => {
             description,
         } = req.body;
 
-        const paymentIntentId = req.body.paymentIntentId;
-
-        const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-
-        if (paymentIntent.status !== "succeeded") {
-            return res.status(400).json({ error: "Le paiement n'a pas été réussi." });
-        }
 
         const email = await getAvailableEmployeForTimeSlot(date, timeSlot);
 

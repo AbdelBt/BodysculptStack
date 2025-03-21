@@ -3,7 +3,6 @@ import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
-import { loadStripe } from "@stripe/stripe-js";
 import { Textarea } from "@/components/ui/textarea";
 
 import {
@@ -33,13 +32,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 
-const stripePromise = loadStripe("pk_live_vzCRUbkde5AIW9Jf00WjY3yf");
-
-const stripe = await stripePromise;
-
 function App() {
   const { toast } = useToast();
-  const [reservationCompleted, setReservationCompleted] = useState(true);
   const [employeeIds, setEmployeeIds] = useState([]);
   const [Days, setDays] = useState([]);
   const [availableDateRange, setAvailableDateRange] = useState({
@@ -171,39 +165,32 @@ function App() {
   };
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sessionId = urlParams.get("session_id");
-
     const fetchReservationData = async () => {
       if (window.location.href.includes("success")) {
+        const paymentId = localStorage.getItem("molliePaymentId");
+
         try {
           const response = await axios.get(
-            `https://bodysculptstack.onrender.com/success?session_id=${sessionId}`
-          );
-          const reservationData = response.data.reservation;
-
-          // Formatage de la date pour affichage
-          const formattedDate = new Date(reservationData.date);
-          const formattedDateString = formattedDate.toLocaleDateString(
-            "fr-FR",
-            {
-              month: "long",
-              day: "numeric",
-            }
+            `http://localhost:3000/success?payment_id=${paymentId}`
           );
 
-          const message = `Votre réservation pour ${reservationData.service} le ${formattedDateString} à ${reservationData.timeSlot} a été planifiée. Un mail de confirmation vous a été envoyé.`;
+          if (response.data && response.data.reservation) {
+            const reservationData = response.data.reservation;
+
+            const formattedDate = new Date(reservationData.date);
+            const formattedDateString = formattedDate.toLocaleDateString(
+              "fr-FR",
+              {
+                month: "long",
+                day: "numeric",
+              }
+            );
+
+            const message = `Votre réservation pour ${reservationData.service} le ${formattedDateString} à ${reservationData.timeSlot} a été planifiée. Un mail de confirmation vous a été envoyé.`;
 
             console.log("Données de la réservation:", reservationData);
 
-          if (!reservationCompleted) {
-            // Soumettre la réservation au backend
-            await axios.post(
-              "https://bodysculptstack.onrender.com/reserve",
-              reservationData
-            );
-            // Mettre à jour reservationCompleted dans sessionStorage
-            sessionStorage.setItem("reservationCompleted", true);
+            await axios.post("http://localhost:3000/reserve", reservationData);
 
             toast({
               title: "Paiement réussi",
@@ -211,28 +198,34 @@ function App() {
               status: "success",
               className: "bg-[#e4d7cc]",
             });
+            fetchUnavailableDays();
 
-            sessionStorage.setItem("reservationCompleted", true);
+            localStorage.removeItem("molliePaymentId");
+          } else {
+            toast({
+              title: "Erreur",
+              description: "Les données de réservation sont manquantes.",
+              status: "error",
+            });
           }
-
-          // Mettre à jour les jours non disponibles
-          fetchUnavailableDays();
-
-          sessionStorage.setItem("reservationCompleted", "true");
-
-          // Mettre à jour l'état local pour éviter les soumissions multiples
-          setReservationCompleted(true);
         } catch (error) {
-          console.error("Error fetching reservation data:", error);
-          // Gérer les erreurs de récupération des données de réservation
+          console.error(
+            "Erreur lors de la récupération des données de réservation:",
+            error
+          );
+          toast({
+            title: "Erreur",
+            description:
+              "Une erreur s'est produite lors du traitement de votre réservation.",
+            status: "error",
+          });
         }
       }
     };
 
-    const timer = setTimeout(fetchReservationData, 500); // Ajustez la durée du délai en millisecondes selon vos besoins
-
+    const timer = setTimeout(fetchReservationData, 500);
     return () => clearTimeout(timer);
-  }, [toast, reservationCompleted]);
+  }, [toast]);
 
   useEffect(() => {
     const handleButtonClick = () => {
@@ -362,7 +355,7 @@ function App() {
   }, [date, unavailableDays]);
 
   const isTimeUnavailableForDate = (time, date, employeeIds) => {
-    if (!date) return false; // Si la date n'est pas définie, le créneau est disponible
+    if (!date) return false;
 
     if (
       !Array.isArray(employeeDaysOff) ||
@@ -372,15 +365,12 @@ function App() {
       console.error(
         "Les données des jours de congé des employés ne sont pas un tableau"
       );
-      return false; // Gérer le cas où les jours de congé des employés ne sont pas disponibles
+      return false;
     }
 
-    // Tableau pour stocker les employés disponibles
-    const availableEmployees = []; // Ajouté
+    const availableEmployees = [];
 
-    // Vérifier si le créneau est indisponible pour chaque employé
     const isAnyEmployeeAvailable = employeeIds.some((employeeId) => {
-      // Vérifier si l'employé a un jour de congé hebdomadaire à la date sélectionnée
       const hasWeeklyDayOff = employeeDaysOffWeek.some((dayOffWeek) => {
         const dayOfWeekMapping = {
           sunday: 0,
@@ -504,6 +494,7 @@ function App() {
   const [firstName, setFirstName] = useState("");
   const [service, setService] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
 
   const formatPhoneNumber = (number) => {
     if (!number.startsWith("+")) {
@@ -517,11 +508,10 @@ function App() {
       .toString()
       .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
     const formattedPhoneNumber = formatPhoneNumber(phoneNumber);
-    sessionStorage.setItem("reservationCompleted", false);
 
     try {
       const sessionResponse = await axios.post(
-        "https://bodysculptstack.onrender.com/create-checkout-session",
+        "http://localhost:3000/create-checkout-session",
         {
           reservationData: {
             service: service,
@@ -530,25 +520,24 @@ function App() {
             timeSlot: selectedTimeSlot,
             clientName: name,
             clientFirstname: firstName,
+            clientEmail: email,
             phoneNumber: formattedPhoneNumber,
           },
-          amount: 3000, // Montant à payer en cents
-          currency: "eur", // Devise
+          amount: 30,
+          currency: "EUR",
         }
       );
 
-      const result = await stripe.redirectToCheckout({
-        sessionId: sessionResponse.data.id,
-      });
+      const { paymentUrl, id: paymentId } = sessionResponse.data;
 
-      if (result.error) {
-        console.error("Erreur de redirection vers Checkout:", result.error);
-
-        // Gérer l'erreur de redirection
+      if (paymentUrl && paymentId) {
+        localStorage.setItem("molliePaymentId", paymentId);
+        window.location.href = paymentUrl;
+      } else {
+        throw new Error("Payment URL not received from server");
       }
     } catch (error) {
       console.error("Error:", error);
-      // Gérer les erreurs en cas de problème avec la requête POST
     }
   };
 
@@ -702,15 +691,26 @@ function App() {
                         />
                       </div>
                     </div>
-
-                    <div className="grid w-full max-w-sm items-center gap-1.5 mt-5 text-left">
-                      <Label htmlFor="message">Note</Label>
-                      <Textarea
-                        placeholder="Note ..."
-                        id="message"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                      />
+                    <div className="flex items-start justify-between">
+                      <div className="grid items-center gap-1.5 mt-5 text-left">
+                        <Label htmlFor="message">Note</Label>
+                        <Textarea
+                          placeholder="Note ..."
+                          id="message"
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                        />
+                      </div>
+                      <div className="grid w-full max-w-sm items-center gap-1.5 mt-5 text-left">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                          type="email"
+                          id="email"
+                          placeholder="Email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -727,7 +727,8 @@ function App() {
                   name &&
                   firstName &&
                   phoneNumber &&
-                  service
+                  service &&
+                  email
                 )
               }
               onClick={handleSubmit}
