@@ -194,10 +194,7 @@ function App() {
 
           const message = `Votre réservation pour ${reservationData.service} le ${formattedDateString} à ${reservationData.timeSlot} a été planifiée. Un mail de confirmation vous a été envoyé.`;
 
-          console.log("Reservation Data:", reservationData);
-
-          const reservationCompleted =
-            sessionStorage.getItem("reservationCompleted") === "true";
+            console.log("Données de la réservation:", reservationData);
 
           if (!reservationCompleted) {
             // Soumettre la réservation au backend
