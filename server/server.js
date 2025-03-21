@@ -43,7 +43,7 @@ app.post('/create-checkout-session', async (req, res) => {
                 currency,
             },
             description: `Reservation: ${reservationData.service}`,
-            redirectUrl: 'http://localhost:5173/success',
+            redirectUrl: 'https://https://bodysculptbymaya.com//success',
             metadata: {
                 reservationData: JSON.stringify(reservationData),
             },
