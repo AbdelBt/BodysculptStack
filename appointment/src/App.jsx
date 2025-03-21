@@ -171,7 +171,7 @@ function App() {
 
         try {
           const response = await axios.get(
-            `http://localhost:3000/success?payment_id=${paymentId}`
+            `https://bodysculptstack.onrender.com/success?payment_id=${paymentId}`
           );
 
           if (response.data && response.data.reservation) {
@@ -190,7 +190,10 @@ function App() {
 
             console.log("Données de la réservation:", reservationData);
 
-            await axios.post("http://localhost:3000/reserve", reservationData);
+            await axios.post(
+              "https://bodysculptstack.onrender.com/reserve",
+              reservationData
+            );
 
             toast({
               title: "Paiement réussi",
@@ -511,7 +514,7 @@ function App() {
 
     try {
       const sessionResponse = await axios.post(
-        "http://localhost:3000/create-checkout-session",
+        "https://bodysculptstack.onrender.com/create-checkout-session",
         {
           reservationData: {
             service: service,
