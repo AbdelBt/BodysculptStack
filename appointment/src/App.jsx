@@ -694,7 +694,7 @@ function App() {
                         />
                       </div>
                     </div>
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between flex-col-reverse md:flex-row">
                       <div className="grid items-center gap-1.5 mt-5 text-left">
                         <Label htmlFor="message">Note</Label>
                         <Textarea
