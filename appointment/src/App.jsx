@@ -259,7 +259,6 @@ function App() {
   const [unavailableDays, setUnavailableDays] = useState([]);
 
   useEffect(() => {
-    // Fonction pour récupérer les services depuis l'API
     const fetchServices = async () => {
       try {
         const response = await axios.get(
