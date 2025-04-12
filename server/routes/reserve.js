@@ -123,7 +123,7 @@ router.post("/", async (req, res) => {
         const mailOptions = {
             from: {
                 name: "Body Sculpt By Maya",
-                address: "abdella.boutaarourt@hotmail.com"
+                address: "houseofbeautybm@gmail.com"
             },
             to: clientEmail,
             subject: "Confirmation de réservation",
@@ -217,7 +217,7 @@ router.post("/appointment", async (req, res) => {
         const mailOptions = {
             from: {
                 name: "Body Sculpt By Maya",
-                address: "abdella.boutaarourt@hotmail.com"
+                address: "houseofbeautybm@gmail.com"
             },
             to: clientEmail,
             subject: "Confirmation de réservation",
@@ -231,7 +231,6 @@ router.post("/appointment", async (req, res) => {
                   <li>Service : ${service}</li>
                   <li>Date : ${date}</li>
                   <li>Heure : ${timeSlot}</li>
-                  <li>Description : ${description}</li>
                 </ul>
                 <p>Merci de nous avoir choisis.</p>
                 <p>Cordialement,<br>L'équipe Body Sculpt By Maya</p>
