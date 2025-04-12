@@ -3,6 +3,11 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
+import { Toaster } from "@/components/ui/toaster";
+import { Button } from "@/components/ui/button";
+import axios from "axios";
+import { useToast } from "@/components/ui/use-toast";
+
 import {
   Phone,
   Mail,
@@ -30,6 +35,8 @@ export default function Calendar() {
   const [events, setEvents] = useState([]);
   const dialogRef = useRef(); // Référence pour AlertDialogTrigger
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [editedDescription, setEditedDescription] = useState("");
+  const { toast } = useToast();
 
   useEffect(() => {
     const user = sessionStorage.getItem("user");
@@ -68,10 +75,10 @@ export default function Calendar() {
   };
 
   const handleEventClick = (arg) => {
-    // Gérer le clic sur un événement dans le calendrier
-    setSelectedEvent(arg.event); // Enregistrer l'événement sélectionné
-
-    showDialog(); // Afficher le dialogue personnalisé
+    const event = arg.event;
+    setSelectedEvent(event);
+    setEditedDescription(event.extendedProps.description || "");
+    showDialog();
   };
 
   const showDialog = () => {
@@ -81,8 +88,55 @@ export default function Calendar() {
     }
   };
 
+  const handleEditDescriptionClick = async () => {
+    if (!selectedEvent?.id) {
+      console.error("Error: Event ID is missing.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `https://bodysculptstack.onrender.com/reserve/${selectedEvent.id}/description`,
+        {
+          description: editedDescription,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        const updatedEvent = {
+          ...selectedEvent,
+          extendedProps: {
+            ...selectedEvent.extendedProps,
+            description: editedDescription,
+          },
+        };
+
+        setEvents((prevEvents) =>
+          prevEvents.map((event) =>
+            event.id === updatedEvent.id ? updatedEvent : event
+          )
+        );
+        fetchReservations();
+        toast({
+          title: "Description updated successfully!",
+          status: "success",
+          className: "bg-[#008000]",
+        });
+      } else {
+        console.error("Error updating description:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error:", error.message);
+    }
+  };
+
   if (isLoading) {
-    return <div>Loading...</div>; // Ou afficher un spinner ou un message de chargement
+    return <div>Loading...</div>;
   }
 
   const eventDetails = selectedEvent
@@ -100,7 +154,7 @@ export default function Calendar() {
     : null;
   return (
     <div style={{ width: "100%", height: "98vh" }} className="text-white m-5">
-      {/* AlertDialog personnalisé */}
+      <Toaster />
       <AlertDialog>
         <AlertDialogTrigger
           ref={dialogRef}
@@ -135,9 +189,12 @@ export default function Calendar() {
                       <span className="flex font-bold	 text-black min-w-[120px] text-lg">
                         <Info /> &nbsp; info:
                       </span>
-                      <span className="font-bold text-black text-lg">
-                        {eventDetails.description}
-                      </span>
+                      <textarea
+                        className="font-bold text-black text-lg"
+                        value={editedDescription}
+                        onChange={(e) => setEditedDescription(e.target.value)}
+                        rows="3"
+                      />
                     </li>
                     <li className="flex items-start">
                       <span className="flex font-bold	 text-black min-w-[120px] text-lg">
@@ -169,6 +226,12 @@ export default function Calendar() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
+            <Button
+              onClick={handleEditDescriptionClick}
+              className="transition-all duration-300 bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              Save Description
+            </Button>
             <AlertDialogAction>Close</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

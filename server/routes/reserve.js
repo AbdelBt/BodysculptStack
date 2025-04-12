@@ -435,6 +435,43 @@ router.delete("/:id", async (req, res) => {
     }
 });
 
+router.post("/:id/description", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { description } = req.body;
+
+        if (!description) {
+            return res.status(400).json({ error: "Description is required." });
+        }
+
+        // Retrieve the current reservation by ID
+        const { data: currentReservation, error: fetchReservationError } = await supabase
+            .from("reservations")
+            .select("*")
+            .eq("id", id)
+            .single();
+
+        if (fetchReservationError) {
+            return res.status(400).json({ error: `Error fetching reservation: ${fetchReservationError.message}` });
+        }
+
+        const { data: updatedReservation, error: updateError } = await supabase
+            .from("reservations")
+            .update({ description })
+            .eq("id", id)
+            .single();
+
+        if (updateError) {
+            return res.status(400).json({ error: `Error updating description: ${updateError.message}` });
+        }
+
+        res.status(200).json({ message: "Reservation description updated successfully", updatedReservation });
+    } catch (error) {
+        console.error("Error updating description:", error.message);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
 // Tâche planifiée pour supprimer les réservations plus de 18 mois
 cron.schedule("0 0 1 * *", async () => { // Exécuter à minuit le 1er de chaque mois
     try {
