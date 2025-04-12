@@ -63,7 +63,7 @@ export default function Calendar() {
         clientName: `${reservation.client_firstname} ${reservation.client_name}`,
         clientEmail: reservation.client_email,
         clientPhone: reservation.client_phone,
-        // Combine date and time in 24-hour format
+        id: reservation.id,
         // Vous pouvez ajuster le format de la date si nécessaire
       }));
       console.log(formattedEvents);
@@ -76,6 +76,7 @@ export default function Calendar() {
 
   const handleEventClick = (arg) => {
     const event = arg.event;
+    console.log("Clicked event:", event);
     setSelectedEvent(event);
     setEditedDescription(event.extendedProps.description || "");
     showDialog();
