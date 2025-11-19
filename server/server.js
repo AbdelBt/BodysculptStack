@@ -8,9 +8,7 @@ const indisponibilitiesRouter = require('./routes/indisponibilities');
 const availabledatesRouter = require('./routes/availabledates');
 const employeeRouter = require('./routes/employee');
 
-const { createMollieClient } = require('@mollie/api-client');
-const mollieClient = createMollieClient({ apiKey: process.env.MOLLIE_API_KEY });
-
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const userRouter = require('./routes/user');
 const serverRouter = require('./routes/service');
@@ -32,51 +30,64 @@ app.use('/indisponibilities', indisponibilitiesRouter);
 
 app.post('/create-checkout-session', async (req, res) => {
     try {
-        const { reservationData, amount, currency } = req.body;
-        console.log('Reservation metaData:', reservationData);
-        console.log('Amount:', amount);
-        console.log('Currency:', currency);
+        const { reservationData, amount } = req.body;
 
-        const payment = await mollieClient.payments.create({
-            amount: {
-                value: amount.toFixed(2),
-                currency,
-            },
-            description: `Reservation: ${reservationData.service}`,
-            redirectUrl: 'https://bodysculptbymaya.com/success',
+        console.log("Reservation:", reservationData);
+        console.log("Amount:", amount);
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card', 'bancontact'],
+            mode: 'payment',
+            line_items: [
+                {
+                    price_data: {
+                        currency: 'eur',
+                        product_data: {
+                            name: `Reservation: ${reservationData.service}`,
+
+                        },
+                        unit_amount: amount,
+                    },
+                    quantity: 1,
+                },
+            ],
+            mode: 'payment',
+
             metadata: {
                 reservationData: JSON.stringify(reservationData),
             },
+            success_url: `http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `http://localhost:5173//cancel`,
         });
-        console.log('Payment ID:', payment.id);
-        res.json({ paymentUrl: payment._links.checkout.href, id: payment.id });
 
+        console.log("Stripe session ID:", session.id);
+        res.json({ id: session.id });
     } catch (error) {
-        console.error('Error creating payment session:', error);
-        res.status(500).json({ error: 'Failed to create payment session' });
+        console.error("Error creating Stripe session:", error);
+        res.status(500).json({ error: "Stripe session creation failed" });
     }
 });
 
 app.get('/success', async (req, res) => {
-    const { payment_id } = req.query;
+    const { session_id } = req.query;
 
-    if (!payment_id) {
-        return res.status(400).json({ error: 'Payment ID is required' });
+    if (!session_id) {
+        return res.status(400).json({ error: "Missing session_id" });
     }
 
     try {
-        const paymentDetails = await mollieClient.payments.get(payment_id);
+        const session = await stripe.checkout.sessions.retrieve(session_id);
 
-        if (paymentDetails.status !== "paid") {
-            return res.status(400).json({ error: 'Payment not completed' });
+        if (session.payment_status !== "paid") {
+            return res.status(400).json({ error: "Payment not completed" });
         }
 
-        const reservationData = JSON.parse(paymentDetails.metadata.reservationData);
+        const reservationData = JSON.parse(session.metadata.reservationData);
 
         res.json({ reservation: reservationData });
 
-    } catch (error) {
-        console.error('Error fetching payment details:', error);
+    } catch (err) {
+        console.error('Error retrieving session:', err);
         res.status(500).json({ error: 'Failed to retrieve payment details' });
     }
 });

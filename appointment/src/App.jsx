@@ -4,6 +4,7 @@ import axios from "axios";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { Textarea } from "@/components/ui/textarea";
+import { loadStripe } from "@stripe/stripe-js";
 
 import {
   AlertDialog,
@@ -32,6 +33,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 
+const stripePromise = loadStripe(
+  "pk_test_51R6aioCmyzMjJTQL0WMFDfqci4WNZVnwYkWvNbrwGcDGbvuqDBf2enlbXaPdgxTNFLuJna6L8zIK6A5GSrtPD05w00hVZgQwkE"
+);
+
 function App() {
   const { toast } = useToast();
   const [employeeIds, setEmployeeIds] = useState([]);
@@ -43,6 +48,7 @@ function App() {
   const [employeeDaysOff, setEmployeeDaysOff] = useState([]);
   const [employeeDaysOffWeek, setEmployeeDaysOffWeek] = useState([]);
   const [employeeAvailablePeriods, setEmployeeAvailablePeriods] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     fetchDays();
@@ -165,68 +171,65 @@ function App() {
   };
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get("session_id");
+
     const fetchReservationData = async () => {
+      // if same session
+
       if (window.location.href.includes("success")) {
-        const paymentId = localStorage.getItem("molliePaymentId");
+        const lastSessionId = sessionStorage.getItem("lastSessionId");
+
+        if (lastSessionId === sessionId) {
+          console.log("Reservation déjà traitée pour ce session_id");
+          return;
+        }
 
         try {
           const response = await axios.get(
-            `https://bodysculptstack.onrender.com/success?payment_id=${paymentId}`
+            `https://bodysculptstack.onrender.com/success?session_id=${sessionId}`
+          );
+          const reservationData = response.data.reservation;
+
+          // Formatage de la date pour affichage
+          const formattedDate = new Date(reservationData.date);
+          const formattedDateString = formattedDate.toLocaleDateString(
+            "fr-FR",
+            {
+              month: "long",
+              day: "numeric",
+            }
           );
 
-          if (response.data && response.data.reservation) {
-            const reservationData = response.data.reservation;
+          const message = `Votre réservation pour ${reservationData.service} le ${formattedDateString} à ${reservationData.timeSlot} a été planifiée. Un mail de confirmation vous a été envoyé.`;
 
-            const formattedDate = new Date(reservationData.date);
-            const formattedDateString = formattedDate.toLocaleDateString(
-              "fr-FR",
-              {
-                month: "long",
-                day: "numeric",
-              }
-            );
+          console.log("Reservation Data:", reservationData);
 
-            const message = `Votre réservation pour ${reservationData.service} le ${formattedDateString} à ${reservationData.timeSlot} a été planifiée. Un mail de confirmation vous a été envoyé.`;
-
-            console.log("Données de la réservation:", reservationData);
-
-            await axios.post(
-              "https://bodysculptstack.onrender.com/reserve",
-              reservationData
-            );
-
-            toast({
-              title: "Paiement réussi",
-              description: message,
-              status: "success",
-              className: "bg-[#e4d7cc]",
-            });
-            fetchUnavailableDays();
-
-            localStorage.removeItem("molliePaymentId");
-          } else {
-            toast({
-              title: "Erreur",
-              description: "Les données de réservation sont manquantes.",
-              status: "error",
-            });
-          }
-        } catch (error) {
-          console.error(
-            "Erreur lors de la récupération des données de réservation:",
-            error
+          // Soumettre la réservation au backend
+          await axios.post(
+            "https://bodysculptstack.onrender.com/reserve",
+            reservationData
           );
+          // Mettre à jour reservationCompleted dans sessionStorage
+          sessionStorage.setItem("lastSessionId", sessionId);
           toast({
-            title: "Erreur",
-            description:
-              "Une erreur s'est produite lors du traitement de votre réservation.",
-            status: "error",
+            title: "Paiement réussi",
+            description: message,
+            status: "success",
+            className: "bg-[#e4d7cc]",
           });
+
+          // Mettre à jour les jours non disponibles
+          fetchUnavailableDays();
+        } catch (error) {
+          console.error("Error fetching reservation data:", error);
+          // Gérer les erreurs de récupération des données de réservation
         }
       }
     };
 
-    const timer = setTimeout(fetchReservationData, 500);
+    const timer = setTimeout(fetchReservationData, 500); // Ajustez la durée du délai en millisecondes selon vos besoins
+
     return () => clearTimeout(timer);
   }, [toast]);
 
@@ -506,6 +509,8 @@ function App() {
   };
 
   const handleSubmit = async () => {
+    const stripe = await stripePromise;
+
     const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)
       .toString()
       .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
@@ -525,18 +530,17 @@ function App() {
             clientEmail: email,
             phoneNumber: formattedPhoneNumber,
           },
-          amount: 30,
+          amount: 3000,
           currency: "EUR",
         }
       );
 
-      const { paymentUrl, id: paymentId } = sessionResponse.data;
+      const result = await stripe.redirectToCheckout({
+        sessionId: sessionResponse.data.id,
+      });
 
-      if (paymentUrl && paymentId) {
-        localStorage.setItem("molliePaymentId", paymentId);
-        window.location.href = paymentUrl;
-      } else {
-        throw new Error("Payment URL not received from server");
+      if (result.error) {
+        console.error("Erreur de redirection vers Checkout:", result.error);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -546,7 +550,7 @@ function App() {
   return (
     <div className="App">
       <Toaster />
-      <AlertDialog className="z-100">
+      <AlertDialog open={isOpen} onOpenChange={setIsOpen} className="z-100">
         <AlertDialogTrigger id="myAlertDialogTrigger" />
         <AlertDialogContent>
           <AlertDialogHeader>
