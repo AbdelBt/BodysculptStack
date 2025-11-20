@@ -51,8 +51,6 @@ app.post('/create-checkout-session', async (req, res) => {
                     quantity: 1,
                 },
             ],
-            mode: 'payment',
-
             metadata: {
                 reservationData: JSON.stringify(reservationData),
             },
