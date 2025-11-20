@@ -56,8 +56,8 @@ app.post('/create-checkout-session', async (req, res) => {
             metadata: {
                 reservationData: JSON.stringify(reservationData),
             },
-            success_url: `http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `http://localhost:5173//cancel`,
+            success_url: `https://bodysculptbymaya.com/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `httpS://bodysculptbymaya.com//cancel`,
         });
 
         console.log("Stripe session ID:", session.id);
