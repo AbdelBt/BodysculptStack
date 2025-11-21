@@ -34,7 +34,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 
 const stripePromise = loadStripe(
-  "pk_test_51R6aioCmyzMjJTQL0WMFDfqci4WNZVnwYkWvNbrwGcDGbvuqDBf2enlbXaPdgxTNFLuJna6L8zIK6A5GSrtPD05w00hVZgQwkE"
+  "pk_live_51M6KDPDnPugJ1SbJ31IM2DX4xId4Tuw4YWFl1SacYgpzmN7SKHpBRRb9CEE0iazw5cIBOjnJ5SylWGiSorO4p51R00DH3I6Ldt"
 );
 
 function App() {
