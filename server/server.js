@@ -44,6 +44,7 @@ app.post('/create-checkout-session', async (req, res) => {
                         currency: 'eur',
                         product_data: {
                             name: `Reservation: ${reservationData.service}`,
+                            images: ["https://www.bodysculptbymaya.com/assets/Logo-D1rs9X4s.png"]
 
                         },
                         unit_amount: amount,
