@@ -35,8 +35,66 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
         integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        .goog-te-banner-frame {
+            display: none !important;
+            visibility: hidden !important;
+        }
+
+        #google_translate_element,
+        .goog-te-gadget,
+        .goog-te-combo,
+        .goog-logo-link,
+        .goog-te-gadget-icon,
+        .goog-te-banner-frame.skiptranslate {
+            display: none !important;
+        }
+
+        .goog-te-balloon-frame {
+            display: none !important;
+        }
+
+        body>.skiptranslate {
+            display: none !important;
+        }
+
+        body {
+            top: 0 !important;
+        }
+    </style>
 
 </head>
+
+<div id="google_translate_element"></div>
+
+<script type="text/javascript">
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+            { pageLanguage: 'fr', includedLanguages: 'en,nl' },
+            'google_translate_element'
+        );
+    }
+</script>
+<script>
+    function doGTranslate(langPair) {
+        if (langPair.value) langPair = langPair.value;
+        var lang = langPair.split('|')[1];
+
+        var select = document.querySelector('.goog-te-combo');
+        if (!select) {
+            setTimeout(function () { doGTranslate(langPair); }, 500);
+        } else {
+            select.value = lang;
+            select.dispatchEvent(new Event('change'));
+        }
+    }
+    function resetLanguage() {
+        document.cookie = "googtrans=; path=/; domain=.translate.google.com; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+        document.cookie = "googtrans=; path=/; domain=" + window.location.hostname + "; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+        location.reload();
+    }
+</script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 <body>
     <div id="root" class="hidden"></div>
@@ -51,12 +109,13 @@
                     <li class="serv"><a class="title active serv" href="#">Services</a>
                         <div class="dropdwn">
                             <ul>
-                                <li><a href="eye.html">eyes booster</a></li>
+                                <li><a href="eye.html">booster eyes</a></li>
                                 <li><a href="vergeture.html">traitement nskin vergetures
                                     </a></li>
                                 <li><a href="dissolution.html">dissolution de graisses nskin
                                     </a></li>
-                                <li><a href="RSP.html">RSP-Fat Burner</a></li>
+                                <!--<li><a href="RSP.html">RSP-Fat Burner</a></li>-->
+                                <li><a href="Cellulame.html">Cellulame fibrose cellulite</a></li>
                                 <li><a href="cutané.html">Relâchement cutané</a></li>
                                 <li><a href="kshape.html">Kshape 3 en 1</a></li>
                                 <li><a href="mesocellule.html">Traitement Mesocellule</a></li>
@@ -68,6 +127,9 @@
                     <li><a class="title" href="contact.html">Contact</a></li>
                     <li class="ig-icon"><a href="https://www.instagram.com/beauty_mayahouse/" target="_blank"><i
                                 class="icon-instagram"></i></a> </li>
+                    <button onclick="doGTranslate('fr|en')">English</button>
+                    <button onclick="doGTranslate('fr|nl')">Nederlands</button>
+                    <button onclick="resetLanguage()">Français</button>
                 </ul>
             </div>
             <div class="toggle icon-menu"></div>
@@ -84,7 +146,6 @@
                     </h2>
                     <p>un traitement efficace pour la réduction ciblée des graisses dans tout le corps.
                     </p>
-                    <a class="button" href="#" id="myButton">réserver !</a>
 
                 </div>
             </div>
@@ -105,150 +166,89 @@
                     </h2>
                     <div class="text">
                         <br>
-                        <div class="text-dissolution">
+                        <div class="text-dissolution flex-col">
                             <div>
-                                <p>L.O.M DISSOLUTION DE GRAISSES
-                                    L.O.M est un traitement efficace pour la réduction ciblée des graisses dans tout le
-                                    corps.
-                                    C’un
-                                    lypolise naturel vise à éliminer les dépôts de graisse indésirables, notamment le
-                                    double
-                                    menton,
-                                    les poignées d’amour, les bourrelets abdominaux, la graisse des jambes et dos . La
-                                    formule
-                                    unique favorise la production de collagène à long terme, améliore l’élasticité de la
-                                    peau et
-                                    accélère la décomposition des cellules graisseuses. Grâce à des ingrédients tels que
-                                    la
-                                    riboflavine pour un métabolisme plus actif, la lécithine pour une décomposition
-                                    accélérée
-                                    des
-                                    cellules graisseuses et la bromélaïne de l’ananas pour réduire l’inflammation et
-                                    détruire
-                                    les
-                                    membranes des cellules graisseuses, L.O.M offre une alternative sûre et naturelle à
-                                    la
-                                    réduction
-                                    des graisses. Contrairement à d’autres produits similaires, il ne contient que des
-                                    ingrédients
-                                    naturels et peut être utilisé en plus grandes quantités.
+                                <p>FAQ – Traitement dissolvant des graisses
                                     <br>
                                     <br>
-                                    Les dosages par séance autorisés. * Double menton : 10-15 ml par séance * Bras :
-                                    10-20ml
-                                    par
-                                    séance * Hanches : 15-20 ml par séance * Ventre : 20 ml par séance * Cuisses : 10-20
-                                    ml
-                                    par
-                                    séance
+
+                                    Qu’est-ce que le traitement dissolvant des graisses ?
+                                    <br>
+                                    C’est une méthode esthétique qui aide à réduire les petits amas graisseux
+                                    résistants.
+                                    La formule, composée de bromélaïne, riboflavine et lécithine, agit pour dégrader les
+                                    cellules graisseuses et favoriser leur élimination naturelle.
                                     <br>
                                     <br>
+
+                                    Quelles zones peuvent être traitées ?
+                                    <br>
+                                    Ce soin est idéal pour le double menton, le ventre, les bras, les hanches ou les
+                                    cuisses, sans chirurgie.
+                                    <br>
+                                    <br>
+
+                                    Comment se déroule le traitement ?
+                                    <br>
+                                    Le protocole comprend 3 séances par zone, espacées de 7 à 10 jours.
+                                    Les premiers résultats apparaissent généralement entre 5 et 7 jours après la séance.
+
+                                    <br>
+                                    <br>
+                                    Comment optimiser les résultats ?
+                                    <br>
+                                    • Boire suffisamment d’eau
+                                    <br>
+                                    • Adopter une alimentation équilibrée.
+                                    <br>
+                                    •Maintenir une activité physique légère et régulière
+                                    <br>
+                                    <br>
+
+                                    Contre-indications?
+                                    <br>
+                                    Le traitement est déconseillé en cas de :
+                                    <br>
+                                    • Grossesse ou allaitement <br>
+                                    • Allergie à la bromélaïne, riboflavine ou lécithine <br>
+                                    • Maladie auto-immune <br>
+                                    • Problèmes hépatiques ou rénaux importants <br>
+                                    • Inflammation ou infection sur la <br>
+                                    zone <br>
+                                    •Prise d’anticoagulants
+
+                                    <br>
+                                    <br>
+                                    Vous pouvez également nous envoyer vos photos pour une évaluation à distance.
+                                    <br>
+                                    <br>
+
+                                    Pour découvrir plus d’avant/après et les témoignages de nos clients, retrouvez-nous
+                                    sur nos réseaux sociaux. Nous restons disponibles pour toute question.
+                                    <br>
+                                    <br>
+
+                                    Prix : 390eur pour 350ml
+
+
+
+                                    <br>
+                                    <br>
+
+
+
+
                                 </p>
                             </div>
-                            <div style="border-right: 2px solid #DDD0C8; margin: 0 2%;">
+                            <br><br>
+                            <div class=" flex justify-center"> <a class="button" href="#" id="myButton">Je
+                                    réserve (accompte)
+                                </a>
                             </div>
-                            <div>
-                                <p class="w-full"> CE QUI REND L.O.M UNIQUE : * Étant donné qu’il s’agit d’un produit à
-                                    base
-                                    d’ingrédients
-                                    sûrs
-                                    et
-                                    naturels, vous pouvez en utiliser une quantité suffisante pour une partie de votre
-                                    corps. *
-                                    Vous
-                                    verrez de grands résultats dès la 2 eme séance . Bien sûr nous conseillons de faire
-                                    les
-                                    4
-                                    séance
-                                    par zone pour voir des bon résultats comme sur les photos poster . * Pas de douleur
-                                    ni
-                                    de
-                                    gonflement et une action rapide sur les amas graisseuses. * Même sans lidocaïne, il
-                                    n’y
-                                    a
-                                    pas de
-                                    douleur car la concentration de pH est déjà * Ajuster. * Ceux traitement est sans
-                                    les
-                                    ingrédients chimiques tels que PPC (phosphatidylcholine), Lipase (Hyaluronidase) ni
-                                    Désoxycholate de sodium.
-                                    <br>
-                                    <br>
-                                    DISSOLUTION DE GRAISSE L.O.M est la solution idéale pour les adultes qui recherchent
-                                    une
-                                    réduction ciblée des Amas graisseux. L’application recommandée est de trois à quatre
-                                    seance
-                                    par
-                                    mois et par zone. A l’attention de notre clientèle ce traitement est pour la perte
-                                    en
-                                    centimètres Uniquement ( adipocytes cellules qui stockent les graisses).
-                                </p>
-                            </div>
-                        </div>
-                        <div style="border-top: 2px solid #DDD0C8; margin:3% 0 ;">
-                        </div>
-                        <p style=" width: 75%;" class="border-primary">
-                            Afin de faciliter le travail pour la praticienne veuillez nous contacter sur Instagram
-                            avant
-                            toute prise de rendez-vous et nous communiquer une photo de la zone que vous souhaitez
-                            traiter
-                            pour vous donner toutes les informations et le nombre de séances convenu pour votre cas
-                            .
-                        </p>
-                        <br>
-                        <div class="flex justify-center contre-dissolution" style="gap: 10%;">
-                            <div> <b>Les contre -indications :</b>
-                                <br>
-                                <br>
-                                <li class="LILOGO"> Pas hypertension</li>
-                                <li class="LILOGO">Pas de diabète </li>
-                                <li class="LILOGO">Pas être enceinte</li>
-                                <li class="LILOGO">Pas de allaitement</li>
-                                <li class="LILOGO">pas Lipo-œdème </li>
-                                <li class="LILOGO">Pas Troubles thyroïdiens</li>
-                                <li class="LILOGO">Pas de psoriasis, l’eczéma</li>
-                                <li class="LILOGO">Pas de Lipodystrophie</li>
-                                <li class="LILOGO">Ni Maladie du foie et des reins</li>
-                            </div>
-                            <div>
-                                <b>Précautions avant traitement :</b>
-                                <br>
-                                <br>
-                                <p>le jour de la séance =>
-                                </p>
-                                <li>
-                                    Pas de consommation d’alcool 24 h00 avant la séanc
-                                </li>
-                                <li>
-                                    Pas de consommation de caféine avant la séance .
-
-                                </li>
-
-                                <br>
-                                <br>
-
-
-                            </div>
-
-
 
                         </div>
-                        <br>
-                        <p class="text-center">Attention ⚠️ veuillez bien prendre connaissance des contre indication
-                            avant de
-                            prendre
-                            rendez-vous.
-
-                        </p>
                     </div>
-                    <br><br>
-                    <div class=" flex justify-center"> <a class="button" href="#" id="myButton">Je
-                            réserve (accompte)
-                        </a>
-                    </div>
-
                 </div>
-            </div>
-            </div>
         </section>
 
 

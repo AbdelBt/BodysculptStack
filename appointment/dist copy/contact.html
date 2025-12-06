@@ -33,8 +33,66 @@
     <link rel="icon" href="./assets/Logo-D1rs9X4s.png" type="image/x-icon">
     <meta name="msapplication-TileColor" content="#69B99D">
     <meta name="theme-color" content="#69B99D">
+    <style>
+        .goog-te-banner-frame {
+            display: none !important;
+            visibility: hidden !important;
+        }
+
+        #google_translate_element,
+        .goog-te-gadget,
+        .goog-te-combo,
+        .goog-logo-link,
+        .goog-te-gadget-icon,
+        .goog-te-banner-frame.skiptranslate {
+            display: none !important;
+        }
+
+        .goog-te-balloon-frame {
+            display: none !important;
+        }
+
+        body>.skiptranslate {
+            display: none !important;
+        }
+
+        body {
+            top: 0 !important;
+        }
+    </style>
 
 </head>
+
+<div id="google_translate_element"></div>
+
+<script type="text/javascript">
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+            { pageLanguage: 'fr', includedLanguages: 'en,nl' },
+            'google_translate_element'
+        );
+    }
+</script>
+<script>
+    function doGTranslate(langPair) {
+        if (langPair.value) langPair = langPair.value;
+        var lang = langPair.split('|')[1];
+
+        var select = document.querySelector('.goog-te-combo');
+        if (!select) {
+            setTimeout(function () { doGTranslate(langPair); }, 500);
+        } else {
+            select.value = lang;
+            select.dispatchEvent(new Event('change'));
+        }
+    }
+    function resetLanguage() {
+        document.cookie = "googtrans=; path=/; domain=.translate.google.com; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+        document.cookie = "googtrans=; path=/; domain=" + window.location.hostname + "; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+        location.reload();
+    }
+</script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 <body>
 
@@ -48,12 +106,13 @@
                     <li class="serv"><a class="title serv" href="#">Services</a>
                         <div class="dropdwn">
                             <ul>
-                                <li><a href="eye.html">eyes booster</a></li>
+                                <li><a href="eye.html">booster eyes</a></li>
                                 <li><a href="vergeture.html">traitement nskin vergetures
                                     </a></li>
                                 <li><a href="dissolution.html">dissolution de graisses nskin
                                     </a></li>
-                                <li><a href="RSP.html">RSP-Fat Burner</a></li>
+                                <!--<li><a href="RSP.html">RSP-Fat Burner</a></li>-->
+                                <li><a href="Cellulame.html">Cellulame fibrose cellulite</a></li>
                                 <li><a href="cutané.html">Relâchement cutané</a></li>
                                 <li><a href="kshape.html">Kshape 3 en 1</a></li>
                                 <li><a href="mesocellule.html">Traitement Mesocellule</a></li>
@@ -65,6 +124,9 @@
                     <li><a class="title active" href="contact.html">Contact</a></li>
                     <li class="ig-icon"><a href="https://www.instagram.com/beauty_mayahouse/" target="_blank"><i
                                 class="icon-instagram"></i></a> </li>
+                    <button onclick="doGTranslate('fr|en')">English</button>
+                    <button onclick="doGTranslate('fr|nl')">Nederlands</button>
+                    <button onclick="resetLanguage()">Français</button>
                 </ul>
             </div>
             <div class="toggle icon-menu"></div>

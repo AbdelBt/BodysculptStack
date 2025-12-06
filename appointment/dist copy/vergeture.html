@@ -36,8 +36,68 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
         integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        .goog-te-banner-frame {
+            display: none !important;
+            visibility: hidden !important;
+        }
+
+        #google_translate_element,
+        .goog-te-gadget,
+        .goog-te-combo,
+        .goog-logo-link,
+        .goog-te-gadget-icon,
+        .goog-te-banner-frame.skiptranslate {
+            display: none !important;
+        }
+
+        .goog-te-balloon-frame {
+            display: none !important;
+        }
+
+        body>.skiptranslate {
+            display: none !important;
+        }
+
+        body {
+            top: 0 !important;
+        }
+    </style>
 
 </head>
+
+<div id="google_translate_element"></div>
+
+<script type="text/javascript">
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+            { pageLanguage: 'fr', includedLanguages: 'en,nl' },
+            'google_translate_element'
+        );
+    }
+</script>
+<script>
+    function doGTranslate(langPair) {
+        if (langPair.value) langPair = langPair.value;
+        var lang = langPair.split('|')[1];
+
+        var select = document.querySelector('.goog-te-combo');
+        if (!select) {
+            setTimeout(function () { doGTranslate(langPair); }, 500);
+        } else {
+            select.value = lang;
+            select.dispatchEvent(new Event('change'));
+        }
+    }
+    function resetLanguage() {
+        document.cookie = "googtrans=; path=/; domain=.translate.google.com; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+        document.cookie = "googtrans=; path=/; domain=" + window.location.hostname + "; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+        location.reload();
+    }
+</script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+
 
 <body>
     <div id="root" class="hidden"></div>
@@ -57,7 +117,7 @@
                                     </a></li>
                                 <li><a href="dissolution.html">dissolution de graisse nskin
                                     </a></li>
-                                <li><a href="RSP.html">RSP-Fat Burner</a></li>
+                                <li><a href="Cellulame.html">Cellulame fibrose cellulite</a></li>
                                 <li><a href="cutané.html">Relâchement cutané</a></li>
                                 <li><a href="kshape.html">Kshape 3 en 1</a></li>
                                 <li><a href="mesocellule.html">Traitement Mesocellule</a></li>
@@ -68,6 +128,11 @@
                     <li><a class="title" href="contact.html">Contact</a></li>
                     <li class="ig-icon"><a href="https://www.instagram.com/beauty_mayahouse/" target="_blank"><i
                                 class="icon-instagram"></i></a> </li>
+                    <button onclick="doGTranslate('fr|en')">English</button>
+                    <button onclick="doGTranslate('fr|nl')">Nederlands</button>
+                    <button onclick="resetLanguage()">Français</button>
+
+
                 </ul>
             </div>
             <div class="toggle icon-menu"></div>
@@ -83,8 +148,7 @@
                     <h2 class="title">Traitement Nskin Vergetures</h2>
                     <p>Le traitement des vergetures Nskin est une innovation avec des résultats exceptionnels jamais vus
                         auparavant dans le monde de l'esthétique.</p>
-                    <a class="button" href="#" id="myButton">
-                        RÉSERVER !</a>
+
                 </div>
             </div>
         </section>
@@ -101,61 +165,100 @@
                 <div class="text">
                     <h2 class="title">Traitement Vergetures
                     </h2>
-                    <p>Le traitement vergetures Nskin est un soin innovant aux résultats exceptionnels jamais vus dans
-                        le monde de l’esthétique.
+                    <p>FAQ – Traitement Vergetures Nskin
                         <br>
                         <br>
-                        Ce traitement avancé aide à réduire pour de bon jusqu’à 95% de vos vergetures blanches et rouges
-                        ! Le processus de cette procédure est suivi d’une utilisation de produits révolutionnaires qui
-                        aident à stimuler le flux sanguin sous la peau, il prévient également l’élasticité et augmente
-                        le métabolisme. Ceci est ensuite suivi d’une technique d’aspiration qui élève le sang jusqu’à la
-                        couche supérieure de chaque vergeture à travers la zone concernée. Aider au renouvellement de
-                        votre peau, et donc réduire et cicatriser la zone de 90%.
+
+
+                        1. En quoi consiste le traitement Nskin ?
+                        <br>
+
+                        Le traitement Nskin combine des produits stimulants et une technique d’aspiration pour favoriser
+                        la régénération cutanée et la cicatrisation, permettant de réduire les vergetures rouges et
+                        blanches de 50 à 85 %.
+                        <br>
+                        <br>
+                        2. Quels sont les bienfaits du traitement ?
+                        <br>
+
+                        Le traitement :
+                        •Stimule la production de collagène
+                        •Lisse et retire les zones de peau fripée
+                        • Raffermit la peau
+                        • Rend les vergetures moins visibles (voire les fait disparaître dans certains cas)
+                        •Convient à tous les types de peau
+                        <br>
+                        <br>
+                        3. Combien de séances sont nécessaires ?
+                        <br>
+
+                        Il faut 3 séances, espacées de 12 à 30 jours, pour obtenir des résultats optimaux.
+                        <br>
+                        <br>
+
+                        4. Quelles zones peuvent être traitées ?
+                        <br>
+
+                        Fessiers, dos, bras, ventre, hanches, entre-jambes, poitrine et arrière des jambes.
+                        <br>
+                        <br>
+
+                        5. Que dois-je faire après le traitement ?
+                        <br>
+
+                        Un produit post-opératoire est inclus.
+                        Vous devez l’appliquer matin et soir pendant 12 jours.
+                        Pendant ces 12 jours : pas de sauna, hammam ou activité aquatique.
+                        <br>
+                        <br>
+
+                        6. Quelles sont les contre-indications ?
+                        <br>
+
+                        Le traitement n’est pas recommandé en cas de :
+                        • Grossesse
+                        • Problèmes de circulation
+                        • Problèmes de cicatrisation
+                        <br>
+                        <br>
+                        7. Combien de temps dure une séance ?
+                        <br>
+
+                        Chaque séance dure 30 à 40 minutes selon la zone.
+                        <br>
+                        <br>
+
+
+                        8. Puis-je faire une consultation à distance ?
+                        <br>
+
+                        Oui. Vous pouvez envoyer une photo de la zone à traiter pour recevoir un avis personnalisé.
+                        <br>
+                        <br>
+
+                        Pour découvrir plus d’avant/après et les témoignages de nos clients, retrouvez-nous sur nos
+                        réseaux sociaux. Nous restons disponibles pour toute question.
+
+
 
 
                         <br>
+
+                        <li class="LILOGO"> Promo Séance individuelle : 290€
+                            <br>
+
+                            Forfait 3 séances : 630€
+                        </li>
+                        <li class="LILOGO">Pour réservé vous payer 30,00 euro d’acompte
+                        </li>
                         <br>
-                        Le résultat est déjà visible après une séance. Le nombre de séances maximum est de 3 séances
-                        avec soins pas plus . Car il promet de réduire les vergetures jusqu’à 95%Des crèmes de soin vous
-                        sont fournies, qu’il faudra utiliser régulièrement et correctement matin et soir, pendant une
-                        durée de 12 jours afin d’obtenir des résultats optimaux. Les vergetures peuvent provoquer un
-                        affaissement et parfois une rupture du tissu collagène. Avec ce traitement, ceux-ci sont activés
-                        et renforcés. Dite au revoir à vos vergetures les filles!
                         <br>
-                    </p>
-                    <b>Nombre de séance :
-                    </b>
-                    <p>Ce traiter nécessite 3 séance par zone pour avoir des résultats optimaux.
-                        Les seance sont espacées de 12 jour à 30 jour cela dépend de chaque cas .
-                    </p>
-                    <b>Les zone concernant :
-                    </b>
-                    <p>Fessier, dos , bras , ventre , entre-jambe, hanche, poitrine, arrière -jambes .
-                    </p>
-                    <b>Conditions pour pouvoir réserver une séance :</b>
-                    <br>
-                    <li>Pas enceinte.</li>
 
-                    <li>Ne pas avoir de problème de circulation sanguine
 
-                    </li>
-                    <li>Ne pas avoir de problème de cicatrisation </li>
-                    <br>
-                    <p>N’hésitez pas à nous contacter pour toute question concernant les contre-indication avant de
-                        réserver votre rendez-vous. </p>
 
-                    <li class="LILOGO">Durée de la séance 30 minutes à 2 heures en fonction de la zone à traiter.
-                    </li>
-                    <li class="LILOGO">Pour réservé vous payer 30,00 euro d’acompte
-                    </li>
-                    <br>
-                    <br>
-
-                    <P>Le prix est de 890,00€ pour 3 séances</P>
-
-                    <a class="button" href="#" id="myButton">Je
-                        réserve (accompte)
-                    </a>
+                        <a class="button" href="#" id="myButton">Je
+                            réserve (accompte)
+                        </a>
                 </div>
             </div>
             </div>
