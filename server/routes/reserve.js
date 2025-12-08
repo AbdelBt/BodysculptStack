@@ -4,18 +4,38 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const cron = require("node-cron");
 
 const router = express.Router();
-const nodemailer = require("nodemailer");
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    host: "smtp-gmail.com",
-    port: 587,
-    secure: false,
-    auth: {
-        user: "houseofbeautybm@gmail.com",
-        pass: process.env.APP_PASSWORD,
-    },
-});
+const sendEmail = async (mailOptions) => {
+    try {
+        const msg = {
+            to: mailOptions.to,
+            from: {
+                name: "Body Sculpt By Maya",
+                email: "noreply@bodysculptbymaya.com"
+            },
+            subject: mailOptions.subject,
+            html: mailOptions.html,
+            replyTo: "noreply@bodysculptbymaya.com"
+        };
+
+        const [response] = await sgMail.send(msg);
+        console.log("E-mail envoyé avec succès:", response.statusCode);
+        console.log("Headers:", response.headers);
+    } catch (error) {
+        console.error("Erreur lors de l'envoi de l'e-mail:", error.response?.body || error);
+    }
+};
+
+const mailOptions = {
+    to: "abdella.boutaarourt@hotmail.com",
+    subject: "Test envoi SendGrid",
+    html: "<p>Test d'envoi depuis SendGrid</p>"
+};
+(async () => {
+    await sendEmail(mailOptions);
+})();
 // Supabase configuration
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
@@ -121,10 +141,6 @@ router.post("/", async (req, res) => {
 
         // Configurer l'e-mail de confirmation
         const mailOptions = {
-            from: {
-                name: "Body Sculpt By Maya",
-                address: "houseofbeautybm@gmail.com"
-            },
             to: clientEmail,
             subject: "Confirmation de réservation",
             html: `
@@ -150,17 +166,10 @@ router.post("/", async (req, res) => {
         };
 
         // Envoyer l'e-mail de confirmation
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.error("Erreur lors de l'envoi de l'e-mail:", error);
-            } else {
-                console.log("E-mail envoyé:", info.response);
-            }
-        });
+        await sendEmail(mailOptions);
 
-        res
-            .status(201)
-            .json({ message: "Reservation created successfully", reservationData });
+
+        res.status(201).json({ message: "Reservation created successfully", reservationData });
     } catch (error) {
         console.error(error.message);
         res.status(500).json({ message: "Server Error" });
@@ -215,10 +224,6 @@ router.post("/appointment", async (req, res) => {
         });
 
         const mailOptions = {
-            from: {
-                name: "Body Sculpt By Maya",
-                address: "houseofbeautybm@gmail.com"
-            },
             to: clientEmail,
             subject: "Confirmation de réservation",
             html: `
@@ -242,13 +247,7 @@ router.post("/appointment", async (req, res) => {
           `,
         };
 
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.error("Erreur lors de l'envoi de l'e-mail:", error);
-            } else {
-                console.log("E-mail envoyé:", info.response);
-            }
-        });
+        await sendEmail(mailOptions);
 
         res.status(201).json({ message: "Reservation created successfully", reservationData });
     } catch (error) {
@@ -342,10 +341,6 @@ router.post("/:id/status", async (req, res) => {
 
             // Configurer l'e-mail d'annulation
             const cancelMailOptions = {
-                from: {
-                    name: "Body Sculpt By Maya",
-                    address: "abdella.boutaarourt@hotmail.com"
-                },
                 to: currentReservation.client_email,
                 subject: "Annulation de votre réservation",
                 html: `
@@ -364,13 +359,8 @@ router.post("/:id/status", async (req, res) => {
             };
 
             // Envoyer l'e-mail d'annulation
-            transporter.sendMail(cancelMailOptions, (error, info) => {
-                if (error) {
-                    console.error("Erreur lors de l'envoi de l'e-mail d'annulation :", error);
-                } else {
-                    console.log("E-mail d'annulation envoyé :", info.response);
-                }
-            });
+            await sendEmail(cancelMailOptions);
+
         } else if ((status === "pending" || status === "confirmed") && !currentReservation.employe_email) {
             // Si le statut est "pending" ou "confirm" et qu'aucun employé n'est assigné, trouver un employé disponible
             const email = await getAvailableEmployeForTimeSlot(currentReservation.date, currentReservation.time_slot);

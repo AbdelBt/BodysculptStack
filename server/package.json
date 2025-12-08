@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@mollie/api-client": "^4.2.0",
+    "@sendgrid/mail": "^8.1.6",
     "@supabase/supabase-js": "^2.43.4",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
@@ -20,7 +21,8 @@
     "mongoose": "^8.4.1",
     "mysql": "^2.18.1",
     "node-cron": "^3.0.3",
-    "nodemailer": "^6.9.14",
+    "nodemailer": "^6.10.1",
+    "nodemailer-sendgrid-transport": "^0.2.0",
     "stripe": "^15.10.0"
   },
   "devDependencies": {
