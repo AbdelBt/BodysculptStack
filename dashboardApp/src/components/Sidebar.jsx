@@ -219,62 +219,72 @@ export default function Sidebar({ handleLogout }) {
 
   const getTime = async () => {
     try {
-      // Récupérer les horaires de travail depuis le backend
-      const response = await axios.get(
-        "https://bodysculptstack.onrender.com/available-dates/working-hours"
-      );
-      const workingHours = response.data;
+      // Récupérer les horaires de travail et jours spéciaux
+      const [workingHoursRes, specialDaysRes] = await Promise.all([
+        axios.get(
+          "https://bodysculptstack.onrender.com/available-dates/working-hours"
+        ),
+        axios.get(
+          "https://bodysculptstack.onrender.com/available-dates/special-days"
+        ),
+      ]);
 
-      const specialDaysResponse = await axios.get(
-        "https://bodysculptstack.onrender.com/available-dates/special-days"
-      );
-      const specialDays = specialDaysResponse.data;
+      const workingHours = workingHoursRes.data;
+      const specialDays = specialDaysRes.data;
 
-      // Assurez-vous que date est définie et correspond au jour sélectionné
+      if (!date) return;
+
       const selectedDate = new Date(date);
-      const selectedDay = selectedDate.toLocaleDateString("en-US", {
+      const selectedDayName = selectedDate.toLocaleDateString("en-US", {
         weekday: "long",
       });
+      const selectedDateFormatted = selectedDate.toISOString().split("T")[0];
 
-      const selectedDateFormatted = new Date(
-        new Date(date).setDate(new Date(date).getDate() + 1)
-      )
-        .toISOString()
-        .split("T")[0];
-
-      // Check if the selected date is a special day
+      // Vérifier si c'est un jour spécial
       const specialDay = specialDays.find(
         (day) => day.date === selectedDateFormatted
       );
 
-      // Filtrer les horaires pour le jour sélectionné
+      // Récupérer les horaires normaux pour le jour sélectionné
       const dayHours = workingHours.find(
-        (item) => item.day_of_week === selectedDay
+        (item) => item.day_of_week === selectedDayName
       );
 
-      // Création d'un tableau pour les créneaux horaires disponibles
+      // Déterminer les heures de début et de fin en minutes
+      let startHour = 10,
+        startMinute = 0,
+        endHour = 22,
+        endMinute = 0;
+
+      if (dayHours) {
+        [startHour, startMinute] = dayHours.start_hour.split(":").map(Number);
+        [endHour, endMinute] = dayHours.end_hour.split(":").map(Number);
+      }
+
+      if (specialDay) {
+        [startHour, startMinute] = specialDay.opening_hour
+          .split(":")
+          .map(Number);
+        [endHour, endMinute] = specialDay.closing_hour.split(":").map(Number);
+      }
+
+      const startTotalMinutes = startHour * 60 + startMinute;
+      const endTotalMinutes = endHour * 60 + endMinute;
+
       const timeList = [];
+      let currentTotalMinutes = startTotalMinutes;
 
-      // Utiliser les horaires récupérés pour définir les heures
-      const startHour = specialDay
-        ? parseInt(specialDay.opening_hour)
-        : dayHours
-        ? dayHours.start_hour
-        : 10;
-      const endHour = specialDay
-        ? parseInt(specialDay.closing_hour)
-        : dayHours
-        ? dayHours.end_hour
-        : 22;
+      while (currentTotalMinutes <= endTotalMinutes) {
+        const currentHour = Math.floor(currentTotalMinutes / 60);
+        const currentMinute = currentTotalMinutes % 60;
 
-      for (let i = startHour; i <= endHour; i++) {
-        const hour = i < 10 ? "0" + i : i; // Formater l'heure pour avoir toujours deux chiffres
-        const time = hour + ":00";
+        const time = `${currentHour.toString().padStart(2, "0")}:${currentMinute
+          .toString()
+          .padStart(2, "0")}`;
 
-        // Fonction pour vérifier si le créneau est disponible
         const isUnavailable = isTimeUnavailableForDate(
           time,
-          date,
+          selectedDate,
           employeeIds,
           employeeDaysOff,
           unavailableDays,
@@ -283,6 +293,8 @@ export default function Sidebar({ handleLogout }) {
         );
 
         timeList.push({ time, isUnavailable });
+
+        currentTotalMinutes += 90; // passer au prochain créneau de 1h30
       }
 
       setTimeSlot(timeList);

@@ -59,10 +59,15 @@ export default function Company() {
       setWorkingHours(workingHoursMap);
 
       const timeList = [];
-      for (let i = 10; i <= 18; i++) {
-        const hour = i < 10 ? "0" + i : i;
-        const time = hour + ":00";
-        timeList.push({ time });
+      for (let hour = 10; hour <= 19; hour++) {
+        for (let minute = 0; minute < 60; minute += 30) {
+          if (hour === 22 && minute > 0) break;
+
+          const formattedHour = hour.toString().padStart(2, "0");
+          const formattedMinute = minute.toString().padStart(2, "0");
+          const time = `${formattedHour}:${formattedMinute}`;
+          timeList.push({ time });
+        }
       }
 
       setTimeSlot(timeList);
@@ -208,7 +213,7 @@ export default function Company() {
         ...prev,
         [selectedDay]: {
           ...prev[selectedDay],
-          start_hour: time.split(":")[0],
+          start_hour: time + ":00",
         },
       }));
     } else if (!selectedClosingHour) {
@@ -219,7 +224,7 @@ export default function Company() {
           ...prev,
           [selectedDay]: {
             ...prev[selectedDay],
-            end_hour: time.split(":")[0],
+            end_hour: time + ":00",
           },
         }));
       } else {
@@ -413,8 +418,8 @@ export default function Company() {
       const updatedHours = {
         ...workingHours,
         [selectedDay]: {
-          start_hour: selectedOpeningHour.split(":")[0],
-          end_hour: selectedClosingHour.split(":")[0],
+          start_hour: selectedOpeningHour + ":00",
+          end_hour: selectedClosingHour + ":00",
         },
       };
 
@@ -422,8 +427,8 @@ export default function Company() {
         "https://bodysculptstack.onrender.com/available-dates/working-hours",
         {
           day_of_week: selectedDay,
-          start_hour: selectedOpeningHour.split(":")[0],
-          end_hour: selectedClosingHour.split(":")[0],
+          start_hour: selectedOpeningHour + ":00",
+          end_hour: selectedClosingHour + ":00",
         }
       );
 
@@ -436,6 +441,9 @@ export default function Company() {
       setWorkingHours(updatedHours);
       setSelectedOpeningHour(null);
       setSelectedClosingHour(null);
+
+      // Rafraîchir les données
+      await getTime();
     } catch (error) {
       console.error("Error saving working hours:", error);
       toast({
@@ -506,11 +514,16 @@ export default function Company() {
                     "Sunday",
                   ].map((day) => {
                     const hours = workingHours[day] || {
-                      start_hour: "00",
-                      end_hour: "00",
+                      start_hour: "00:00:00",
+                      end_hour: "00:00:00",
                     };
-                    const startTime = `${hours.start_hour}:00`;
-                    const endTime = `${hours.end_hour}:00`;
+                    const startTime = hours.start_hour
+                      ? hours.start_hour.substring(0, 5)
+                      : "00:00";
+                    const endTime = hours.end_hour
+                      ? hours.end_hour.substring(0, 5)
+                      : "00:00";
+
                     return (
                       <AccordionItem value={day} key={day}>
                         <AccordionTrigger onClick={() => setSelectedDay(day)}>

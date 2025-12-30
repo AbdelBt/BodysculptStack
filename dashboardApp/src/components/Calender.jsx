@@ -48,25 +48,73 @@ export default function Calendar() {
     }
   }, [navigate]);
 
+  // Fonction pour mettre à jour le statut
+  const updateStatus = async (reservationId, newStatus) => {
+    try {
+      await axios.post(
+        `https://bodysculptstack.onrender.com/reserve/${reservationId}/status`,
+        { status: newStatus }
+      );
+
+      const updatedEvents = events.map((event) => {
+        if (event.reservationId === reservationId) {
+          return {
+            ...event,
+            backgroundColor: newStatus === "cancelled" ? "#dc2626" : "#3788d8",
+            borderColor: newStatus === "cancelled" ? "#dc2626" : "#3788d8",
+            status: newStatus,
+          };
+        }
+        return event;
+      });
+
+      setEvents(updatedEvents);
+
+      await fetchReservations();
+
+      toast({
+        description: `Reservation ${newStatus} successfully!`,
+        status: "success",
+        className: "bg-[#008000]",
+      });
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast({
+        description: "Failed to update status, try again!",
+        variant: "destructive",
+      });
+    }
+  };
+
   const fetchReservations = async () => {
     try {
       const response = await fetch(
         "https://bodysculptstack.onrender.com/reserve"
-      ); // Assurez-vous que l'URL correspond à votre configuration backend
+      );
       const data = await response.json();
-      const formattedEvents = data.reservations.map((reservation) => ({
-        title: `${reservation.service} - ${reservation.client_firstname}`,
-        start: `${reservation.date}T${reservation.time_slot}`,
-        time: `${reservation.time_slot}`,
-        service: reservation.service,
-        description: reservation.description,
-        clientName: `${reservation.client_firstname} ${reservation.client_name}`,
-        clientEmail: reservation.client_email,
-        clientPhone: reservation.client_phone,
-        id: reservation.id,
-        // Vous pouvez ajuster le format de la date si nécessaire
-      }));
-      console.log(formattedEvents);
+
+      const formattedEvents = data.reservations.map((reservation) => {
+        // Déterminer la couleur en fonction du statut
+        const isCancelled = reservation.status === "cancelled";
+
+        return {
+          title: `${reservation.service} - ${reservation.client_firstname}`,
+          start: `${reservation.date}T${reservation.time_slot}`,
+          time: `${reservation.time_slot}`,
+          service: reservation.service,
+          description: reservation.description,
+          clientName: `${reservation.client_firstname} ${reservation.client_name}`,
+          clientEmail: reservation.client_email,
+          clientPhone: reservation.client_phone,
+          id: reservation.id,
+          status: reservation.status || "confirmed",
+          // Propriétés de style
+          backgroundColor: isCancelled ? "#dc2626" : "#3788d8",
+          borderColor: isCancelled ? "#dc2626" : "#3788d8",
+          textColor: "#ffffff",
+        };
+      });
+
       setEvents(formattedEvents);
       setIsLoading(false);
     } catch (error) {
@@ -77,6 +125,7 @@ export default function Calendar() {
   const handleEventClick = (arg) => {
     const event = arg.event;
     console.log("Clicked event:", event);
+
     setSelectedEvent(event);
     setEditedDescription(event.extendedProps.description || "");
     showDialog();
@@ -151,6 +200,8 @@ export default function Calendar() {
         clientEmail: selectedEvent.extendedProps.clientEmail,
         clientPhone: selectedEvent.extendedProps.clientPhone,
         description: selectedEvent.extendedProps.description,
+        id: selectedEvent.id,
+        status: selectedEvent.extendedProps.status,
       }
     : null;
   return (
@@ -226,13 +277,34 @@ export default function Calendar() {
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <Button
-              onClick={handleEditDescriptionClick}
-              className="transition-all duration-300 bg-blue-500 text-white px-4 py-2 rounded"
-            >
-              Save Description
-            </Button>
+          <AlertDialogFooter className="flex flex-col sm:flex-row gap-2">
+            {eventDetails && (
+              <>
+                <Button
+                  onClick={handleEditDescriptionClick}
+                  className="transition-all duration-300 !bg-blue-500 text-white px-4 py-2 rounded"
+                >
+                  Save Description
+                </Button>
+
+                {eventDetails.status !== "cancelled" ? (
+                  <Button
+                    onClick={() => updateStatus(eventDetails.id, "cancelled")}
+                    className="transition-all duration-300 !bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                  >
+                    Cancel Reservation
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => updateStatus(eventDetails.id, "confirmed")}
+                    className="transition-all duration-300 !bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                  >
+                    Confirm Reservation
+                  </Button>
+                )}
+              </>
+            )}
+
             <AlertDialogAction>Close</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -245,7 +317,7 @@ export default function Calendar() {
         slotLabelFormat={{
           hour: "2-digit",
           minute: "2-digit",
-          hour12: false, // Utiliser le format 24 heures
+          hour12: false,
           meridiem: false,
         }}
         headerToolbar={{
@@ -255,8 +327,8 @@ export default function Calendar() {
         }}
         events={events}
         height="100%"
-        selectable={true} // Permet la sélection de plage de dates
-        eventClick={handleEventClick} // Gérer le clic sur un événement
+        selectable={true}
+        eventClick={handleEventClick}
       />
     </div>
   );
