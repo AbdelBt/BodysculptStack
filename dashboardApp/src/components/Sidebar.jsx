@@ -393,7 +393,7 @@ export default function Sidebar({ handleLogout }) {
         const isSameYear = date.getFullYear() === unavailableDate.getFullYear();
         const isSameMonth = date.getMonth() === unavailableDate.getMonth();
         const isSameDay = date.getDate() === unavailableDate.getDate();
-        const isSameTime = time === unavailable.time_slot.split(":")[0] + ":00";
+        const isSameTime = time === unavailable.time_slot.slice(0, 5);
         const isSameEmployee = unavailable.employe_email === employeeId;
 
         const isBooked =
