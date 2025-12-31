@@ -690,7 +690,6 @@ function App() {
                           inputProps={{
                             name: "phone",
                             required: true,
-                            autoFocus: true,
                           }}
                           onChange={(value) => setPhoneNumber(value)}
                         />
