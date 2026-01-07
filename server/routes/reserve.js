@@ -236,6 +236,7 @@ router.post("/appointment", async (req, res) => {
                   <li>Service : ${service}</li>
                   <li>Date : ${date}</li>
                   <li>Heure : ${timeSlot}</li>
+                  <li>Adresse : Verbeytstraat 51, 1853 Grimbergen </li>
                 </ul>
                 <p>Merci de nous avoir choisis.</p>
                 <p>Cordialement,<br>L'équipe Body Sculpt By Maya</p>
