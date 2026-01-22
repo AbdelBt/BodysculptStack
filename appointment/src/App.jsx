@@ -34,7 +34,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 
 const stripePromise = loadStripe(
-  "pk_live_51M6KDPDnPugJ1SbJ31IM2DX4xId4Tuw4YWFl1SacYgpzmN7SKHpBRRb9CEE0iazw5cIBOjnJ5SylWGiSorO4p51R00DH3I6Ldt"
+  "pk_live_51M6KDPDnPugJ1SbJ31IM2DX4xId4Tuw4YWFl1SacYgpzmN7SKHpBRRb9CEE0iazw5cIBOjnJ5SylWGiSorO4p51R00DH3I6Ldt",
 );
 
 function App() {
@@ -57,14 +57,14 @@ function App() {
   const fetchDays = async () => {
     try {
       const response = await axios.get(
-        "https://bodysculptstack.onrender.com/indisponibilities"
+        "https://bodysculptstack.onrender.com/indisponibilities",
       );
       if (response.data.length > 0) {
         // eslint-disable-next-line no-unused-vars
         const { id, ...days } = response.data[0]; // Exclure l'ID
         setDays(days); // Mettre à jour l'état avec les jours non disponibles
         const availableDatesResponse = await axios.get(
-          "https://bodysculptstack.onrender.com/available-dates"
+          "https://bodysculptstack.onrender.com/available-dates",
         );
         if (availableDatesResponse.data.length > 0) {
           let { from_date, to_date } = availableDatesResponse.data[0];
@@ -85,7 +85,7 @@ function App() {
   const fetchUnavailableDays = async () => {
     try {
       const response = await axios.get(
-        "https://bodysculptstack.onrender.com/reserve"
+        "https://bodysculptstack.onrender.com/reserve",
       );
       const { reservations, employeeIds } = response.data;
       const filteredEmployeeIds = employeeIds.filter((id) => id); // Supprime les valeurs null, undefined et vides
@@ -100,13 +100,13 @@ function App() {
   const fetchEmployeeDaysoffWeek = async () => {
     try {
       const response = await axios.get(
-        "https://bodysculptstack.onrender.com/employee/days/all"
+        "https://bodysculptstack.onrender.com/employee/days/all",
       );
       const daysOffWeekData = response.data;
 
       // Filtrer les jours où available est false
       const filteredDaysOffWeek = daysOffWeekData.filter(
-        (day) => !day.available
+        (day) => !day.available,
       );
 
       // Mettre à jour l'état des jours de congé des employés
@@ -122,13 +122,12 @@ function App() {
   const fetchEmployeeAvailablePeriods = async () => {
     try {
       const response = await axios.get(
-        "https://bodysculptstack.onrender.com/employee/all"
+        "https://bodysculptstack.onrender.com/employee/all",
       );
       const availablePeriodsData = response.data;
 
       // Mettre à jour l'état des périodes de disponibilité des employés
       setEmployeeAvailablePeriods(availablePeriodsData);
-      console.log(availablePeriodsData);
 
       return availablePeriodsData;
     } catch (error) {
@@ -150,7 +149,7 @@ function App() {
   const fetchEmployeeDaysOff = async () => {
     try {
       const response = await axios.get(
-        "https://bodysculptstack.onrender.com/employee/days-off/all"
+        "https://bodysculptstack.onrender.com/employee/days-off/all",
       );
       const daysOffData = response.data.daysOff;
 
@@ -187,7 +186,7 @@ function App() {
 
         try {
           const response = await axios.get(
-            `https://bodysculptstack.onrender.com/success?session_id=${sessionId}`
+            `https://bodysculptstack.onrender.com/success?session_id=${sessionId}`,
           );
           const reservationData = response.data.reservation;
 
@@ -198,7 +197,7 @@ function App() {
             {
               month: "long",
               day: "numeric",
-            }
+            },
           );
 
           const message = `Votre réservation pour ${reservationData.service} le ${formattedDateString} à ${reservationData.timeSlot} a été planifiée. Un mail de confirmation vous a été envoyé.`;
@@ -208,7 +207,7 @@ function App() {
           // Soumettre la réservation au backend
           await axios.post(
             "https://bodysculptstack.onrender.com/reserve",
-            reservationData
+            reservationData,
           );
           // Mettre à jour reservationCompleted dans sessionStorage
           sessionStorage.setItem("lastSessionId", sessionId);
@@ -236,7 +235,7 @@ function App() {
   useEffect(() => {
     const handleButtonClick = () => {
       const myAlertDialogTrigger = document.getElementById(
-        "myAlertDialogTrigger"
+        "myAlertDialogTrigger",
       );
       if (myAlertDialogTrigger) {
         myAlertDialogTrigger.click();
@@ -265,7 +264,7 @@ function App() {
     const fetchServices = async () => {
       try {
         const response = await axios.get(
-          "https://bodysculptstack.onrender.com/services"
+          "https://bodysculptstack.onrender.com/services",
         );
         setServices(response.data);
       } catch (error) {
@@ -280,10 +279,10 @@ function App() {
     try {
       const [workingHoursRes, specialDaysRes] = await Promise.all([
         axios.get(
-          "https://bodysculptstack.onrender.com/available-dates/working-hours"
+          "https://bodysculptstack.onrender.com/available-dates/working-hours",
         ),
         axios.get(
-          "https://bodysculptstack.onrender.com/available-dates/special-days"
+          "https://bodysculptstack.onrender.com/available-dates/special-days",
         ),
       ]);
 
@@ -299,11 +298,11 @@ function App() {
       const selectedDateFormatted = selectedDate.toISOString().split("T")[0];
 
       const specialDay = specialDays.find(
-        (day) => day.date === selectedDateFormatted
+        (day) => day.date === selectedDateFormatted,
       );
 
       const dayHours = workingHours.find(
-        (item) => item.day_of_week === selectedDayName
+        (item) => item.day_of_week === selectedDayName,
       );
 
       // ⏱️ Conversion heures → minutes
@@ -345,7 +344,7 @@ function App() {
           employeeDaysOff,
           unavailableDays,
           employeeDaysOffWeek,
-          employeeAvailablePeriods
+          employeeAvailablePeriods,
         );
 
         timeList.push({ time, isUnavailable });
@@ -377,7 +376,7 @@ function App() {
       !Array.isArray(employeeAvailablePeriods)
     ) {
       console.error(
-        "Les données des jours de congé des employés ne sont pas un tableau"
+        "Les données des jours de congé des employés ne sont pas un tableau",
       );
       return false;
     }
@@ -434,7 +433,7 @@ function App() {
             date <= toDate;
 
           return isAvailable;
-        }
+        },
       );
 
       if (!isWithinAvailablePeriod) {
@@ -471,9 +470,32 @@ function App() {
     return !isAnyEmployeeAvailable; // Si aucun employé n'est disponible pour ce créneau, retourner true
   };
 
+  const [workingHours, setWorkingHours] = useState([]);
+  const [specialDays, setSpecialDays] = useState([]);
+
+  useEffect(() => {
+    const fetchHours = async () => {
+      try {
+        const [whRes, sdRes] = await Promise.all([
+          axios.get(
+            "https://bodysculptstack.onrender.com/available-dates/working-hours",
+          ),
+          axios.get(
+            "https://bodysculptstack.onrender.com/available-dates/special-days",
+          ),
+        ]);
+        setWorkingHours(whRes.data);
+        setSpecialDays(sdRes.data);
+      } catch (error) {
+        console.error("Erreur récupération horaires:", error);
+      }
+    };
+    fetchHours();
+  }, []);
+
   const isDay = useCallback(
     (day) => {
-      const dayOfWeek = day.getDay(); // Obtenir le jour de la semaine (0: dimanche, 1: lundi, ..., 6: samedi)
+      const dayOfWeek = day.getDay();
       const daysMap = {
         0: "sunday",
         1: "monday",
@@ -483,20 +505,86 @@ function App() {
         5: "friday",
         6: "saturday",
       };
+      const dayName = daysMap[dayOfWeek];
 
-      const dayName = daysMap[dayOfWeek]; // Obtenir le nom du jour
-      const isUnavailable = Days[dayName] === false;
+      if (day < new Date()) return true;
+      if (Days[dayName] === false) return true;
 
-      // Vérifiez si la date est dans la plage disponible
       const isInAvailableRange =
         availableDateRange.from && availableDateRange.to
           ? day >= availableDateRange.from && day <= availableDateRange.to
           : true;
+      if (!isInAvailableRange) return true;
 
-      // Vérifier si le jour est marqué comme non disponible dans Days
-      return isUnavailable || !isInAvailableRange || day < new Date();
+      let startHour = 10,
+        startMinute = 0,
+        endHour = 22,
+        endMinute = 0;
+
+      const selectedDayName = day.toLocaleDateString("en-US", {
+        weekday: "long",
+      });
+      const selectedDateFormatted = day.toISOString().split("T")[0];
+
+      const specialDay = specialDays.find(
+        (d) => d.date === selectedDateFormatted,
+      );
+      const dayHours = workingHours.find(
+        (d) => d.day_of_week === selectedDayName,
+      );
+
+      if (dayHours) {
+        [startHour, startMinute] = dayHours.start_hour.split(":").map(Number);
+        [endHour, endMinute] = dayHours.end_hour.split(":").map(Number);
+      }
+
+      if (specialDay) {
+        [startHour, startMinute] = specialDay.opening_hour
+          .split(":")
+          .map(Number);
+        [endHour, endMinute] = specialDay.closing_hour.split(":").map(Number);
+      }
+
+      // 🔹 Générer les créneaux pour ce jour
+      const startTotalMinutes = startHour * 60 + startMinute;
+      const endTotalMinutes = endHour * 60 + endMinute;
+      let currentTotalMinutes = startTotalMinutes;
+      const timeList = [];
+
+      while (currentTotalMinutes <= endTotalMinutes) {
+        const currentHour = Math.floor(currentTotalMinutes / 60);
+        const currentMinute = currentTotalMinutes % 60;
+        const time = `${currentHour.toString().padStart(2, "0")}:${currentMinute
+          .toString()
+          .padStart(2, "0")}`;
+
+        const isUnavailable = isTimeUnavailableForDate(
+          time,
+          day,
+          employeeIds,
+          employeeDaysOff,
+          unavailableDays,
+          employeeDaysOffWeek,
+          employeeAvailablePeriods,
+        );
+
+        timeList.push({ time, isUnavailable });
+        currentTotalMinutes += 90;
+      }
+
+      return timeList.every((slot) => slot.isUnavailable);
     },
-    [Days, availableDateRange]
+    [
+      Days,
+      availableDateRange,
+      employeeIds,
+      employeeDaysOff,
+      unavailableDays,
+      employeeDaysOffWeek,
+      employeeAvailablePeriods,
+      workingHours,
+      specialDays,
+    ],
   );
 
   const isPastDay = (day) => {
@@ -541,7 +629,7 @@ function App() {
           },
           amount: 3000,
           currency: "EUR",
-        }
+        },
       );
 
       const result = await stripe.redirectToCheckout({
@@ -633,8 +721,8 @@ function App() {
                               item.isUnavailable
                                 ? "bg-red-300 text-gray-600 cursor-not-allowed hover:"
                                 : item.time === selectedTimeSlot
-                                ? "bg-primary text-white"
-                                : ""
+                                  ? "bg-primary text-white"
+                                  : ""
                             }
     `}
                         >
