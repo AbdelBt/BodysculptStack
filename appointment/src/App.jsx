@@ -476,7 +476,7 @@ function App() {
   useEffect(() => {
     const fetchHours = async () => {
       try {
-        const [whRes, sdRes] = await Promise.all([
+        const [workingHoursRes, specialDaysRes] = await Promise.all([
           axios.get(
             "https://bodysculptstack.onrender.com/available-dates/working-hours",
           ),
@@ -484,8 +484,8 @@ function App() {
             "https://bodysculptstack.onrender.com/available-dates/special-days",
           ),
         ]);
-        setWorkingHours(whRes.data);
-        setSpecialDays(sdRes.data);
+        setWorkingHours(workingHoursRes.data);
+        setSpecialDays(specialDaysRes.data);
       } catch (error) {
         console.error("Erreur récupération horaires:", error);
       }
