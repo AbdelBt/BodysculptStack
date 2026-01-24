@@ -266,7 +266,17 @@ function App() {
         const response = await axios.get(
           "https://bodysculptstack.onrender.com/services",
         );
-        setServices(response.data);
+        // Normalize names: trim, lowercase and remove diacritics for matching
+        const normalized = (response.data || []).map((s) => {
+          const original = s.name ? s.name.toString().trim() : "";
+          const nameLower = original.toLowerCase();
+          const nameNorm = nameLower
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+          return { ...s, name: original, nameLower, nameNorm };
+        });
+        console.log("Fetched services:", normalized);
+        setServices(normalized);
       } catch (error) {
         console.error("Error fetching services:", error);
       }
@@ -595,6 +605,7 @@ function App() {
   const [description, setDescription] = useState("");
   const [firstName, setFirstName] = useState("");
   const [service, setService] = useState("");
+  const [isServiceAutoSelected, setIsServiceAutoSelected] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
 
@@ -643,6 +654,127 @@ function App() {
       console.error("Error:", error);
     }
   };
+
+  // Supprimez/Remplacez l'ancien useEffect statique et ajoutez celui-ci :
+  useEffect(() => {
+    if (!services || services.length === 0) return;
+
+    const mappingKeywords = {
+      "eye.html": ["eye", "eyes", "booster", "booter"],
+      "vergeture.html": ["vergeture", "vergetures"],
+      "dissolution.html": ["dissolution", "dissolution de graisse", "graisse"],
+      "Cellulame.html": [
+        "cellulame",
+        "cellulame fibrose",
+        "cellulame fibrose ",
+      ],
+      "cutané.html": ["relachement", "relâchement", "cutane", "cutané"],
+      "kshape.html": ["kshape"],
+      "mesocellule.html": ["mesocellule", "messo", "messo cellulite", "meso"],
+      "sbio.html": ["sbio", "whitening"],
+    };
+
+    // lowercase + normalize mapping keys & keywords (remove diacritics)
+    const normalize = (s) =>
+      (s || "")
+        .toString()
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
+    const mappingLowerNorm = Object.fromEntries(
+      Object.entries(mappingKeywords).map(([k, v]) => [
+        normalize(k),
+        (v || []).map(normalize),
+      ]),
+    );
+
+    const pickFilename = (path) => {
+      if (!path) return "";
+      return path.split("/").pop();
+    };
+
+    let filename = pickFilename(window.location.pathname);
+    if (!filename && document.referrer) {
+      try {
+        const ref = new URL(document.referrer);
+        filename = pickFilename(ref.pathname);
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    if (!filename) {
+      setService("");
+      setIsServiceAutoSelected(false);
+      return;
+    }
+
+    const filenameDecoded = (() => {
+      try {
+        return decodeURIComponent(filename);
+      } catch (e) {
+        return filename;
+      }
+    })();
+
+    const filenameKey = filenameDecoded.toLowerCase();
+    const filenameNorm = normalize(filenameDecoded);
+
+    console.log(
+      "Detected filename:",
+      filename,
+      "decoded:",
+      filenameDecoded,
+      "filenameKey:",
+      filenameKey,
+      "filenameNorm:",
+      filenameNorm,
+    );
+
+    let matchedService = "";
+
+    if (mappingLowerNorm[filenameNorm]) {
+      const keywords = mappingLowerNorm[filenameNorm];
+      console.log("Using mapping keywords for", filenameNorm, "=>", keywords);
+      matchedService = services.find((svc) => {
+        const svcNameNorm = svc.nameNorm || normalize(svc.name);
+        const isMatch = keywords.some((k) => svcNameNorm.includes(k));
+        console.log(
+          `Compare service "${svc.name}" (norm: "${svcNameNorm}") with keywords => ${isMatch}`,
+        );
+        return isMatch;
+      })?.name;
+      console.log("Matched from mapping:", matchedService);
+    }
+
+    // fallback: try to match by filename token inside service name (ignore case & accents)
+    if (!matchedService) {
+      const token = filenameDecoded.split(".")[0] || "";
+      const tokenNorm = normalize(token);
+      console.log("Fallback token:", token, "tokenNorm:", tokenNorm);
+      matchedService = services.find((svc) => {
+        const svcNameNorm = svc.nameNorm || normalize(svc.name);
+        const contains = svcNameNorm.includes(tokenNorm);
+        console.log(
+          `Fallback compare "${svc.name}" (norm: "${svcNameNorm}") includes token "${tokenNorm}" => ${contains}`,
+        );
+        return contains;
+      })?.name;
+      console.log("Matched from fallback:", matchedService);
+    }
+
+    if (matchedService) {
+      console.log("Final matched service:", matchedService);
+      setService(matchedService);
+      setIsServiceAutoSelected(true);
+    } else {
+      console.log("No service matched - will show dropdown");
+      setService("");
+      setIsServiceAutoSelected(false);
+    }
+  }, [services]);
 
   return (
     <div className="App">
@@ -735,28 +867,37 @@ function App() {
                 <div className="flex flex-col">
                   <div className="md:flex justify-between">
                     <div className="mt-5 text-left">
-                      <Select
-                        value={service}
-                        onValueChange={(value) => setService(value)}
-                      >
-                        <Label htmlFor="service">Service</Label>
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Select a service" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            <SelectLabel>Services</SelectLabel>
-                            {services.map((serviceItem) => (
-                              <SelectItem
-                                key={serviceItem.id}
-                                value={serviceItem.name}
-                              >
-                                {serviceItem.name}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
+                      <Label htmlFor="service">Service</Label>
+                      {isServiceAutoSelected ? (
+                        <Input
+                          id="service"
+                          value={service}
+                          readOnly
+                          placeholder="Service (sélection automatique selon la page)"
+                        />
+                      ) : (
+                        <Select
+                          value={service}
+                          onValueChange={(value) => setService(value)}
+                        >
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Select a service" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Services</SelectLabel>
+                              {services.map((serviceItem) => (
+                                <SelectItem
+                                  key={serviceItem.id}
+                                  value={serviceItem.name}
+                                >
+                                  {serviceItem.name}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      )}
                     </div>
                     <div className="grid w-full max-w-sm items-center gap-1.5 mt-5 text-left">
                       <Label htmlFor="name">Prénom </Label>
