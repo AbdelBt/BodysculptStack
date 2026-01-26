@@ -455,7 +455,10 @@ function App() {
         const [uh, um] = unavailableTime.split(":").map(Number);
         const unavailableStart = uh * 60 + um;
         const existingDuration = getServiceDuration(
-          unavailable.service || unavailable.service_name || unavailable.serviceName || "",
+          unavailable.service ||
+            unavailable.service_name ||
+            unavailable.serviceName ||
+            "",
         );
         const unavailableEnd = unavailableStart + existingDuration;
         const isSameEmployee = unavailable.employe_email === employeeId;
@@ -615,6 +618,7 @@ function App() {
       .replace(/[\u0300-\u036f]/g, "");
 
   const getServiceDuration = (serviceName) => {
+    if (!serviceName && !service) return 90; // default 90min when no service selected
     const nameNorm = normalizeStr(serviceName || service || "");
     const sixtyTokens = [
       "dissolution",

@@ -80,14 +80,14 @@ export default function Sidebar({ handleLogout }) {
   const fetchDays = async () => {
     try {
       const response = await axios.get(
-        "https://bodysculptstack.onrender.com/indisponibilities"
+        "https://bodysculptstack.onrender.com/indisponibilities",
       );
       if (response.data.length > 0) {
         // eslint-disable-next-line no-unused-vars
         const { id, ...days } = response.data[0]; // Exclure l'ID
         setDays(days); // Mettre à jour l'état avec les jours non disponibles
         const availableDatesResponse = await axios.get(
-          "https://bodysculptstack.onrender.com/available-dates"
+          "https://bodysculptstack.onrender.com/available-dates",
         );
         if (availableDatesResponse.data.length > 0) {
           let { from_date, to_date } = availableDatesResponse.data[0];
@@ -110,7 +110,7 @@ export default function Sidebar({ handleLogout }) {
   const fetchUnavailableDays = async () => {
     try {
       const response = await axios.get(
-        "https://bodysculptstack.onrender.com/reserve"
+        "https://bodysculptstack.onrender.com/reserve",
       );
       const { reservations, employeeIds } = response.data;
       const filteredEmployeeIds = employeeIds.filter((id) => id); // Supprime les valeurs null, undefined et vides
@@ -125,13 +125,13 @@ export default function Sidebar({ handleLogout }) {
   const fetchEmployeeDaysoffWeek = async () => {
     try {
       const response = await axios.get(
-        "https://bodysculptstack.onrender.com/employee/days/all"
+        "https://bodysculptstack.onrender.com/employee/days/all",
       );
       const daysOffWeekData = response.data;
 
       // Filtrer les jours où available est false
       const filteredDaysOffWeek = daysOffWeekData.filter(
-        (day) => !day.available
+        (day) => !day.available,
       );
 
       // Mettre à jour l'état des jours de congé des employés
@@ -147,7 +147,7 @@ export default function Sidebar({ handleLogout }) {
   const fetchEmployeeAvailablePeriods = async () => {
     try {
       const response = await axios.get(
-        "https://bodysculptstack.onrender.com/employee/all"
+        "https://bodysculptstack.onrender.com/employee/all",
       );
       const availablePeriodsData = response.data;
 
@@ -170,7 +170,7 @@ export default function Sidebar({ handleLogout }) {
   const fetchEmployeeDaysOff = async () => {
     try {
       const response = await axios.get(
-        "https://bodysculptstack.onrender.com/employee/days-off/all"
+        "https://bodysculptstack.onrender.com/employee/days-off/all",
       );
       const daysOffData = response.data.daysOff;
 
@@ -201,11 +201,39 @@ export default function Sidebar({ handleLogout }) {
     return number;
   };
 
+  const normalizeStr = (s) =>
+    (s || "")
+      .toString()
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+
+  const getServiceDuration = (serviceName) => {
+    if (!serviceName && !service) return 90;
+    const nameNorm = normalizeStr(serviceName || service || "");
+    const sixtyTokens = [
+      "dissolution",
+      "eye",
+      "booster",
+      "mesocellule",
+      "meso",
+      "messo",
+      "vergeture",
+      "nskin",
+      "kshape",
+    ];
+
+    return sixtyTokens.some((t) => nameNorm.includes(normalizeStr(t)))
+      ? 60
+      : 90;
+  };
+
   // Fonction pour récupérer les services depuis l'API
   const fetchServices = async () => {
     try {
       const response = await axios.get(
-        "https://bodysculptstack.onrender.com/services"
+        "https://bodysculptstack.onrender.com/services",
       );
       setServices(response.data);
     } catch (error) {
@@ -222,10 +250,10 @@ export default function Sidebar({ handleLogout }) {
       // Récupérer les horaires de travail et jours spéciaux
       const [workingHoursRes, specialDaysRes] = await Promise.all([
         axios.get(
-          "https://bodysculptstack.onrender.com/available-dates/working-hours"
+          "https://bodysculptstack.onrender.com/available-dates/working-hours",
         ),
         axios.get(
-          "https://bodysculptstack.onrender.com/available-dates/special-days"
+          "https://bodysculptstack.onrender.com/available-dates/special-days",
         ),
       ]);
 
@@ -242,12 +270,12 @@ export default function Sidebar({ handleLogout }) {
 
       // Vérifier si c'est un jour spécial
       const specialDay = specialDays.find(
-        (day) => day.date === selectedDateFormatted
+        (day) => day.date === selectedDateFormatted,
       );
 
       // Récupérer les horaires normaux pour le jour sélectionné
       const dayHours = workingHours.find(
-        (item) => item.day_of_week === selectedDayName
+        (item) => item.day_of_week === selectedDayName,
       );
 
       // Déterminer les heures de début et de fin en minutes
@@ -285,16 +313,13 @@ export default function Sidebar({ handleLogout }) {
         const isUnavailable = isTimeUnavailableForDate(
           time,
           selectedDate,
-          employeeIds,
-          employeeDaysOff,
-          unavailableDays,
-          employeeDaysOffWeek,
-          employeeAvailablePeriods
+          service,
         );
 
         timeList.push({ time, isUnavailable });
 
-        currentTotalMinutes += 90; // passer au prochain créneau de 1h30
+        const step = getServiceDuration(service);
+        currentTotalMinutes += step;
       }
 
       setTimeSlot(timeList);
@@ -306,14 +331,14 @@ export default function Sidebar({ handleLogout }) {
   useEffect(() => {
     if (date) {
       getTime(date);
-      if (isTimeUnavailableForDate(selectedTimeSlot, date, employeeIds)) {
+      if (isTimeUnavailableForDate(selectedTimeSlot, date, service)) {
         setSelectedTimeSlot(null);
       }
     }
-  }, [date, unavailableDays]);
+  }, [date, unavailableDays, selectedTimeSlot, service]);
 
-  const isTimeUnavailableForDate = (time, date, employeeIds) => {
-    if (!date) return false; // Si la date n'est pas définie, le créneau est disponible
+  const isTimeUnavailableForDate = (time, date, serviceName) => {
+    if (!time || !date) return false;
 
     if (
       !Array.isArray(employeeDaysOff) ||
@@ -321,16 +346,15 @@ export default function Sidebar({ handleLogout }) {
       !Array.isArray(employeeAvailablePeriods)
     ) {
       console.error(
-        "Les données des jours de congé des employés ne sont pas un tableau"
+        "Les données des jours de congé des employés ne sont pas un tableau",
       );
-      return false; // Gérer le cas où les jours de congé des employés ne sont pas disponibles
+      return false;
     }
 
+    const duration = getServiceDuration(serviceName);
     const availableEmployees = [];
 
-    // Vérifier si le créneau est indisponible pour chaque employé
     const isAnyEmployeeAvailable = employeeIds.some((employeeId) => {
-      // Vérifier si l'employé a un jour de congé hebdomadaire à la date sélectionnée
       const hasWeeklyDayOff = employeeDaysOffWeek.some((dayOffWeek) => {
         const dayOfWeekMapping = {
           sunday: 0,
@@ -349,72 +373,77 @@ export default function Sidebar({ handleLogout }) {
         return isOff;
       });
 
-      if (hasWeeklyDayOff) {
-        return false; // L'employé a un jour de congé hebdomadaire, donc le créneau est indisponible
-      }
+      if (hasWeeklyDayOff) return false;
 
-      // Vérifier si l'employé a un jour de congé à la date sélectionnée
       const isDayOff = employeeDaysOff.some((dayOff) => {
         const dayOffDate = new Date(dayOff.day_off_date);
-        const isOff =
+        return (
           dayOff.employee_email === employeeId &&
           dayOffDate.getFullYear() === date.getFullYear() &&
           dayOffDate.getMonth() === date.getMonth() &&
-          dayOffDate.getDate() === date.getDate();
-
-        return isOff;
+          dayOffDate.getDate() === date.getDate()
+        );
       });
 
-      if (isDayOff) {
-        return false; // L'employé a un jour de congé, donc le créneau est indisponible
-      }
+      if (isDayOff) return false;
 
-      // Vérifier si l'employé est disponible pendant la période spécifiée
       const isWithinAvailablePeriod = employeeAvailablePeriods.some(
         (period) => {
           const fromDate = new Date(period.from_date);
           const toDate = new Date(period.to_date);
-          const isAvailable =
+          return (
             period.employee_email === employeeId &&
             date >= fromDate &&
-            date <= toDate;
-
-          return isAvailable;
-        }
+            date <= toDate
+          );
+        },
       );
 
-      if (!isWithinAvailablePeriod) {
-        return false; // L'employé n'est pas disponible pendant cette période, donc le créneau est indisponible
-      }
+      if (!isWithinAvailablePeriod) return false;
 
-      // Vérifier si le créneau est déjà réservé à la date et à l'heure spécifiées
+      const targetStart = (() => {
+        const [h, m] = time.split(":").map(Number);
+        return h * 60 + m;
+      })();
+      const targetEnd = targetStart + duration;
+
       const isUnavailable = unavailableDays.some((unavailable) => {
         const unavailableDate = new Date(unavailable.date);
         const isSameYear = date.getFullYear() === unavailableDate.getFullYear();
         const isSameMonth = date.getMonth() === unavailableDate.getMonth();
         const isSameDay = date.getDate() === unavailableDate.getDate();
-        const isSameTime = time === unavailable.time_slot.slice(0, 5);
+        const unavailableTime = unavailable.time_slot.slice(0, 5);
+        const [uh, um] = unavailableTime.split(":").map(Number);
+        const unavailableStart = uh * 60 + um;
+        const existingDuration = getServiceDuration(
+          unavailable.service ||
+            unavailable.service_name ||
+            unavailable.serviceName ||
+            "",
+        );
+        const unavailableEnd = unavailableStart + existingDuration;
         const isSameEmployee = unavailable.employe_email === employeeId;
 
-        const isBooked =
+        const overlaps =
           isSameYear &&
           isSameMonth &&
           isSameDay &&
-          isSameTime &&
-          isSameEmployee;
+          isSameEmployee &&
+          targetStart < unavailableEnd &&
+          unavailableStart < targetEnd;
 
-        return isBooked;
+        return overlaps;
       });
 
       if (!isUnavailable) {
-        availableEmployees.push(employeeId); // Ajouter l'employé à la liste des disponibles s'il n'est pas indisponible
-        return true; // L'employé est disponible
+        availableEmployees.push(employeeId);
+        return true;
       }
 
-      return false; // L'employé est indisponible pour ce créneau horaire
+      return false;
     });
 
-    return !isAnyEmployeeAvailable; // Si aucun employé n'est disponible pour ce créneau, retourner true
+    return !isAnyEmployeeAvailable;
   };
 
   const handleSubmit = async () => {
@@ -431,7 +460,7 @@ export default function Sidebar({ handleLogout }) {
       name,
       firstName,
       formattedPhoneNumber,
-      description
+      description,
     );
     try {
       await axios.post(
@@ -445,7 +474,7 @@ export default function Sidebar({ handleLogout }) {
           clientFirstname: firstName,
           phoneNumber: formattedPhoneNumber,
           description: description,
-        }
+        },
       );
       const dateObject = new Date(formattedDate);
 
@@ -507,7 +536,7 @@ export default function Sidebar({ handleLogout }) {
   const fetchClientDetails = async (identifier) => {
     try {
       const response = await axios.get(
-        `https://bodysculptstack.onrender.com/reserve/appointment/${identifier}`
+        `https://bodysculptstack.onrender.com/reserve/appointment/${identifier}`,
       );
       const clientData = response.data[0]; // Assurez-vous que la réponse est un tableau
 
@@ -613,7 +642,7 @@ export default function Sidebar({ handleLogout }) {
       // Vérifier si le jour est marqué comme non disponible dans Days
       return isUnavailable || !isInAvailableRange || day < new Date();
     },
-    [Days, availableDateRange]
+    [Days, availableDateRange],
   );
 
   const isPastDay = (day) => {
@@ -656,7 +685,7 @@ export default function Sidebar({ handleLogout }) {
                         <p>Logout</p>
                       </CommandItem>
                     </div>
-                  )
+                  ),
                 )}
               </CommandGroup>
             ))}
@@ -751,8 +780,8 @@ export default function Sidebar({ handleLogout }) {
                             item.isUnavailable
                               ? "bg-red-300 text-gray-600 cursor-not-allowed hover:"
                               : item.time === selectedTimeSlot
-                              ? "bg-primary text-white"
-                              : ""
+                                ? "bg-primary text-white"
+                                : ""
                           }
   `}
                       >
