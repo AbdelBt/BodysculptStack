@@ -338,7 +338,7 @@ function App() {
 
       const timeList = [];
       let currentTotalMinutes = startTotalMinutes;
-      const step = getServiceDuration(service);
+      const step = 30; // Créneaux de 30 minutes
 
       while (currentTotalMinutes <= endTotalMinutes) {
         const currentHour = Math.floor(currentTotalMinutes / 60);
@@ -567,7 +567,7 @@ function App() {
       let currentTotalMinutes = startTotalMinutes;
       const timeList = [];
 
-      const step = getServiceDuration(service);
+      const step = 30; //  30 minutes
 
       while (currentTotalMinutes <= endTotalMinutes) {
         const currentHour = Math.floor(currentTotalMinutes / 60);
@@ -683,7 +683,6 @@ function App() {
     }
   };
 
-  // Supprimez/Remplacez l'ancien useEffect statique et ajoutez celui-ci :
   useEffect(() => {
     if (!services || services.length === 0) return;
 
@@ -804,12 +803,7 @@ function App() {
       })
       .map((s) => s.name);
 
-    const ninetyList = services
-      .filter((s) => !sixtyList.includes(s.name))
-      .map((s) => s.name);
-
-    console.log("Services 1H:", sixtyList);
-    console.log("Services 1h30:", ninetyList);
+    services.filter((s) => !sixtyList.includes(s.name)).map((s) => s.name);
   }, [services]);
 
   useEffect(() => {
@@ -825,10 +819,7 @@ function App() {
       "vergeture",
       "kshape",
     ];
-    const dur = sixtyTokens.some((t) => nameNorm.includes(normalizeStr(t)))
-      ? 60
-      : 90;
-    console.log("Service sélectionné:", service, "-", dur, "minutes");
+    sixtyTokens.some((t) => nameNorm.includes(normalizeStr(t))) ? 60 : 90;
   }, [service]);
 
   return (

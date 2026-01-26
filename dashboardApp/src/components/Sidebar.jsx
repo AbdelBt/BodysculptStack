@@ -318,7 +318,7 @@ export default function Sidebar({ handleLogout }) {
 
         timeList.push({ time, isUnavailable });
 
-        const step = getServiceDuration(service);
+        const step = 30; // 30 minutes
         currentTotalMinutes += step;
       }
 
