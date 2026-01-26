@@ -49,6 +49,7 @@ function App() {
   const [employeeDaysOffWeek, setEmployeeDaysOffWeek] = useState([]);
   const [employeeAvailablePeriods, setEmployeeAvailablePeriods] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [service, setService] = useState("");
 
   useEffect(() => {
     fetchDays();
@@ -371,7 +372,7 @@ function App() {
         setSelectedTimeSlot(null);
       }
     }
-  }, [date, unavailableDays, selectedTimeSlot]);
+  }, [date, unavailableDays, selectedTimeSlot, service]);
 
   const isTimeUnavailableForDate = (time, date, serviceName) => {
     if (!time || !date) return false;
@@ -594,6 +595,7 @@ function App() {
       workingHours,
       specialDays,
       isTimeUnavailableForDate,
+      service,
     ],
   );
 
@@ -604,7 +606,6 @@ function App() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [firstName, setFirstName] = useState("");
-  const [service, setService] = useState("");
   const [isServiceAutoSelected, setIsServiceAutoSelected] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
