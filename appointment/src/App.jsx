@@ -275,7 +275,6 @@ function App() {
             .replace(/[\u0300-\u036f]/g, "");
           return { ...s, name: original, nameLower, nameNorm };
         });
-        console.log("Fetched services:", normalized);
         setServices(normalized);
       } catch (error) {
         console.error("Error fetching services:", error);
@@ -338,6 +337,7 @@ function App() {
 
       const timeList = [];
       let currentTotalMinutes = startTotalMinutes;
+      const step = getServiceDuration(service);
 
       while (currentTotalMinutes <= endTotalMinutes) {
         const currentHour = Math.floor(currentTotalMinutes / 60);
@@ -350,16 +350,12 @@ function App() {
         const isUnavailable = isTimeUnavailableForDate(
           time,
           selectedDate,
-          employeeIds,
-          employeeDaysOff,
-          unavailableDays,
-          employeeDaysOffWeek,
-          employeeAvailablePeriods,
+          service,
         );
 
         timeList.push({ time, isUnavailable });
 
-        currentTotalMinutes += 90;
+        currentTotalMinutes += step;
       }
 
       setTimeSlot(timeList);
@@ -371,14 +367,14 @@ function App() {
   useEffect(() => {
     if (date) {
       getTime(date);
-      if (isTimeUnavailableForDate(selectedTimeSlot, date, employeeIds)) {
+      if (isTimeUnavailableForDate(selectedTimeSlot, date, service)) {
         setSelectedTimeSlot(null);
       }
     }
-  }, [date, unavailableDays]);
+  }, [date, unavailableDays, selectedTimeSlot]);
 
-  const isTimeUnavailableForDate = (time, date, employeeIds) => {
-    if (!date) return false;
+  const isTimeUnavailableForDate = (time, date, serviceName) => {
+    if (!time || !date) return false;
 
     if (
       !Array.isArray(employeeDaysOff) ||
@@ -391,6 +387,7 @@ function App() {
       return false;
     }
 
+    const duration = getServiceDuration(serviceName);
     const availableEmployees = [];
 
     const isAnyEmployeeAvailable = employeeIds.some((employeeId) => {
@@ -413,10 +410,9 @@ function App() {
       });
 
       if (hasWeeklyDayOff) {
-        return false; // L'employé a un jour de congé hebdomadaire, donc le créneau est indisponible
+        return false;
       }
 
-      // Vérifier si l'employé a un jour de congé à la date sélectionnée
       const isDayOff = employeeDaysOff.some((dayOff) => {
         const dayOffDate = new Date(dayOff.day_off_date);
         const isOff =
@@ -428,56 +424,62 @@ function App() {
         return isOff;
       });
 
-      if (isDayOff) {
-        return false; // L'employé a un jour de congé, donc le créneau est indisponible
-      }
+      if (isDayOff) return false;
 
-      // Vérifier si l'employé est disponible pendant la période spécifiée
       const isWithinAvailablePeriod = employeeAvailablePeriods.some(
         (period) => {
           const fromDate = new Date(period.from_date);
           const toDate = new Date(period.to_date);
-          const isAvailable =
+          return (
             period.employee_email === employeeId &&
             date >= fromDate &&
-            date <= toDate;
-
-          return isAvailable;
+            date <= toDate
+          );
         },
       );
 
-      if (!isWithinAvailablePeriod) {
-        return false; // L'employé n'est pas disponible pendant cette période, donc le créneau est indisponible
-      }
+      if (!isWithinAvailablePeriod) return false;
 
-      // Vérifier si le créneau est déjà réservé à la date et à l'heure spécifiées
+      const targetStart = (() => {
+        const [h, m] = time.split(":").map(Number);
+        return h * 60 + m;
+      })();
+      const targetEnd = targetStart + duration;
+
       const isUnavailable = unavailableDays.some((unavailable) => {
         const unavailableDate = new Date(unavailable.date);
         const isSameYear = date.getFullYear() === unavailableDate.getFullYear();
         const isSameMonth = date.getMonth() === unavailableDate.getMonth();
         const isSameDay = date.getDate() === unavailableDate.getDate();
-        const isSameTime = time === unavailable.time_slot.slice(0, 5);
+        const unavailableTime = unavailable.time_slot.slice(0, 5);
+        const [uh, um] = unavailableTime.split(":").map(Number);
+        const unavailableStart = uh * 60 + um;
+        const existingDuration = getServiceDuration(
+          unavailable.service || unavailable.service_name || unavailable.serviceName || "",
+        );
+        const unavailableEnd = unavailableStart + existingDuration;
         const isSameEmployee = unavailable.employe_email === employeeId;
 
-        const isBooked =
+        const overlaps =
           isSameYear &&
           isSameMonth &&
           isSameDay &&
-          isSameTime &&
-          isSameEmployee;
+          isSameEmployee &&
+          targetStart < unavailableEnd &&
+          unavailableStart < targetEnd;
 
-        return isBooked;
+        return overlaps;
       });
 
       if (!isUnavailable) {
-        availableEmployees.push(employeeId); // Ajouter l'employé à la liste des disponibles s'il n'est pas indisponible
-        return true; // L'employé est disponible
+        availableEmployees.push(employeeId);
+        return true;
       }
 
-      return false; // L'employé est indisponible pour ce créneau horaire
+      return false;
     });
 
-    return !isAnyEmployeeAvailable; // Si aucun employé n'est disponible pour ce créneau, retourner true
+    return !isAnyEmployeeAvailable;
   };
 
   const [workingHours, setWorkingHours] = useState([]);
@@ -561,6 +563,8 @@ function App() {
       let currentTotalMinutes = startTotalMinutes;
       const timeList = [];
 
+      const step = getServiceDuration(service);
+
       while (currentTotalMinutes <= endTotalMinutes) {
         const currentHour = Math.floor(currentTotalMinutes / 60);
         const currentMinute = currentTotalMinutes % 60;
@@ -568,18 +572,10 @@ function App() {
           .toString()
           .padStart(2, "0")}`;
 
-        const isUnavailable = isTimeUnavailableForDate(
-          time,
-          day,
-          employeeIds,
-          employeeDaysOff,
-          unavailableDays,
-          employeeDaysOffWeek,
-          employeeAvailablePeriods,
-        );
+        const isUnavailable = isTimeUnavailableForDate(time, day, service);
 
         timeList.push({ time, isUnavailable });
-        currentTotalMinutes += 90;
+        currentTotalMinutes += step;
       }
 
       return timeList.every((slot) => slot.isUnavailable);
@@ -594,6 +590,7 @@ function App() {
       employeeAvailablePeriods,
       workingHours,
       specialDays,
+      isTimeUnavailableForDate,
     ],
   );
 
@@ -608,6 +605,32 @@ function App() {
   const [isServiceAutoSelected, setIsServiceAutoSelected] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
+
+  const normalizeStr = (s) =>
+    (s || "")
+      .toString()
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+
+  const getServiceDuration = (serviceName) => {
+    const nameNorm = normalizeStr(serviceName || service || "");
+    const sixtyTokens = [
+      "dissolution",
+      "eye",
+      "booster",
+      "mesocellule",
+      "meso",
+      "messo",
+      "vergeture",
+      "kshape",
+    ];
+
+    return sixtyTokens.some((t) => nameNorm.includes(normalizeStr(t)))
+      ? 60
+      : 90;
+  };
 
   const formatPhoneNumber = (number) => {
     if (!number.startsWith("+")) {
@@ -719,62 +742,89 @@ function App() {
       }
     })();
 
-    const filenameKey = filenameDecoded.toLowerCase();
     const filenameNorm = normalize(filenameDecoded);
-
-    console.log(
-      "Detected filename:",
-      filename,
-      "decoded:",
-      filenameDecoded,
-      "filenameKey:",
-      filenameKey,
-      "filenameNorm:",
-      filenameNorm,
-    );
 
     let matchedService = "";
 
     if (mappingLowerNorm[filenameNorm]) {
       const keywords = mappingLowerNorm[filenameNorm];
-      console.log("Using mapping keywords for", filenameNorm, "=>", keywords);
       matchedService = services.find((svc) => {
         const svcNameNorm = svc.nameNorm || normalize(svc.name);
         const isMatch = keywords.some((k) => svcNameNorm.includes(k));
-        console.log(
-          `Compare service "${svc.name}" (norm: "${svcNameNorm}") with keywords => ${isMatch}`,
-        );
+
         return isMatch;
       })?.name;
-      console.log("Matched from mapping:", matchedService);
     }
 
     // fallback: try to match by filename token inside service name (ignore case & accents)
     if (!matchedService) {
       const token = filenameDecoded.split(".")[0] || "";
       const tokenNorm = normalize(token);
-      console.log("Fallback token:", token, "tokenNorm:", tokenNorm);
       matchedService = services.find((svc) => {
         const svcNameNorm = svc.nameNorm || normalize(svc.name);
         const contains = svcNameNorm.includes(tokenNorm);
-        console.log(
-          `Fallback compare "${svc.name}" (norm: "${svcNameNorm}") includes token "${tokenNorm}" => ${contains}`,
-        );
+
         return contains;
       })?.name;
-      console.log("Matched from fallback:", matchedService);
     }
 
     if (matchedService) {
-      console.log("Final matched service:", matchedService);
       setService(matchedService);
       setIsServiceAutoSelected(true);
     } else {
-      console.log("No service matched - will show dropdown");
       setService("");
       setIsServiceAutoSelected(false);
     }
   }, [services]);
+
+  useEffect(() => {
+    if (!services || services.length === 0) return;
+
+    const sixtyTokens = [
+      "dissolution",
+      "eye",
+      "booster",
+      "mesocellule",
+      "meso",
+      "messo",
+      "vergeture",
+      "nskin",
+      "kshape",
+    ];
+
+    const sixtyList = services
+      .filter((s) => {
+        const nameNorm = normalizeStr(s.name || "");
+        return sixtyTokens.some((t) => nameNorm.includes(normalizeStr(t)));
+      })
+      .map((s) => s.name);
+
+    const ninetyList = services
+      .filter((s) => !sixtyList.includes(s.name))
+      .map((s) => s.name);
+
+    console.log("Services 1H:", sixtyList);
+    console.log("Services 1h30:", ninetyList);
+  }, [services]);
+
+  useEffect(() => {
+    if (!service) return;
+    const nameNorm = normalizeStr(service || "");
+    const sixtyTokens = [
+      "dissolution",
+      "eye",
+      "booster",
+      "mesocellule",
+      "meso",
+      "messo",
+      "vergeture",
+      "kshape",
+    ];
+    const dur = sixtyTokens.some((t) => nameNorm.includes(normalizeStr(t)))
+      ? 60
+      : 90;
+    console.log("Service sélectionné:", service, "-", dur, "minutes");
+  }, [service]);
 
   return (
     <div className="App">
