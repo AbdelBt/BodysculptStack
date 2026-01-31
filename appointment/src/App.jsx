@@ -338,7 +338,7 @@ function App() {
 
       const timeList = [];
       let currentTotalMinutes = startTotalMinutes;
-      const step = 30; // Créneaux de 30 minutes
+      const step = 90; //  90 minutes
 
       while (currentTotalMinutes <= endTotalMinutes) {
         const currentHour = Math.floor(currentTotalMinutes / 60);
@@ -567,7 +567,7 @@ function App() {
       let currentTotalMinutes = startTotalMinutes;
       const timeList = [];
 
-      const step = 30; //  30 minutes
+      const step = 90;
 
       while (currentTotalMinutes <= endTotalMinutes) {
         const currentHour = Math.floor(currentTotalMinutes / 60);
@@ -784,17 +784,7 @@ function App() {
   useEffect(() => {
     if (!services || services.length === 0) return;
 
-    const sixtyTokens = [
-      "dissolution",
-      "eye",
-      "booster",
-      "mesocellule",
-      "meso",
-      "messo",
-      "vergeture",
-      "nskin",
-      "kshape",
-    ];
+    const sixtyTokens = ["kshape"];
 
     const sixtyList = services
       .filter((s) => {
@@ -809,16 +799,7 @@ function App() {
   useEffect(() => {
     if (!service) return;
     const nameNorm = normalizeStr(service || "");
-    const sixtyTokens = [
-      "dissolution",
-      "eye",
-      "booster",
-      "mesocellule",
-      "meso",
-      "messo",
-      "vergeture",
-      "kshape",
-    ];
+    const sixtyTokens = ["kshape"];
     sixtyTokens.some((t) => nameNorm.includes(normalizeStr(t))) ? 60 : 90;
   }, [service]);
 

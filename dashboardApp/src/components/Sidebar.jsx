@@ -212,17 +212,7 @@ export default function Sidebar({ handleLogout }) {
   const getServiceDuration = (serviceName) => {
     if (!serviceName && !service) return 90;
     const nameNorm = normalizeStr(serviceName || service || "");
-    const sixtyTokens = [
-      "dissolution",
-      "eye",
-      "booster",
-      "mesocellule",
-      "meso",
-      "messo",
-      "vergeture",
-      "nskin",
-      "kshape",
-    ];
+    const sixtyTokens = ["kshape"];
 
     return sixtyTokens.some((t) => nameNorm.includes(normalizeStr(t)))
       ? 60
@@ -318,7 +308,7 @@ export default function Sidebar({ handleLogout }) {
 
         timeList.push({ time, isUnavailable });
 
-        const step = 30; // 30 minutes
+        const step = 90; // 90 minutes
         currentTotalMinutes += step;
       }
 
