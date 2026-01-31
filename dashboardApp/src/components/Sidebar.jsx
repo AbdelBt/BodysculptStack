@@ -173,7 +173,9 @@ export default function Sidebar({ handleLogout }) {
 
   const fetchAllEmployeeServices = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/employee/services");
+      const res = await axios.get(
+        "https://bodysculptstack.onrender.com/employee/services",
+      );
       const rows = Array.isArray(res.data) ? res.data : [];
       const map = {};
       rows.forEach((r) => {
@@ -545,7 +547,9 @@ export default function Sidebar({ handleLogout }) {
   // Récupère les services fournis par l'employé connecté
   const fetchEmployeeProvidedServices = async (email) => {
     try {
-      const res = await axios.get("http://localhost:3000/employee/services");
+      const res = await axios.get(
+        "https://bodysculptstack.onrender.com/employee/services",
+      );
       const all = res.data || [];
       const provided = all
         .filter((r) => r.employee_email === email)

@@ -257,7 +257,7 @@ export default function MyAvailabilities() {
       setServices(servicesRes.data);
 
       const empRes = await axios.get(
-        "http://localhost:3000/employee/services",
+        "https://bodysculptstack.onrender.com/employee/services",
         { params: { email } },
       );
       // empRes may return all employee-service rows; filter by the requested email
@@ -286,14 +286,20 @@ export default function MyAvailabilities() {
 
     try {
       if (isChecked) {
-        await axios.post("http://localhost:3000/employee/add-service", {
-          employee_email: user.email,
-          service_name: serviceName,
-        });
+        await axios.post(
+          "https://bodysculptstack.onrender.com/employee/add-service",
+          {
+            employee_email: user.email,
+            service_name: serviceName,
+          },
+        );
       } else {
-        await axios.delete("http://localhost:3000/employee/remove-service", {
-          data: { employee_email: user.email, service_name: serviceName },
-        });
+        await axios.delete(
+          "https://bodysculptstack.onrender.com/employee/remove-service",
+          {
+            data: { employee_email: user.email, service_name: serviceName },
+          },
+        );
       }
 
       toast({

@@ -148,7 +148,9 @@ function App() {
   // Récupère la liste complète des services fournis par chaque employé
   const fetchAllEmployeeServices = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/employee/services");
+      const res = await axios.get(
+        "https://bodysculptstack.onrender.com/employee/services",
+      );
       const rows = Array.isArray(res.data) ? res.data : [];
       const map = {};
       rows.forEach((r) => {
