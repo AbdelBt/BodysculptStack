@@ -56,6 +56,9 @@ export default function Sidebar({ handleLogout }) {
   const [firstName, setFirstName] = useState("");
   const [service, setService] = useState("");
   const [services, setServices] = useState([]);
+  const [employeeProvidedServices, setEmployeeProvidedServices] = useState(
+    new Set(),
+  );
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [description, setDescription] = useState("");
@@ -68,6 +71,7 @@ export default function Sidebar({ handleLogout }) {
   const [employeeDaysOff, setEmployeeDaysOff] = useState([]);
   const [employeeDaysOffWeek, setEmployeeDaysOffWeek] = useState([]);
   const [employeeAvailablePeriods, setEmployeeAvailablePeriods] = useState([]);
+  const [employeeServicesMap, setEmployeeServicesMap] = useState({});
   const [availableDateRange, setAvailableDateRange] = useState({
     from: null,
     to: null,
@@ -99,7 +103,6 @@ export default function Sidebar({ handleLogout }) {
             from: new Date(fromDate),
             to: new Date(toDate),
           });
-          console.log(availableDateRange);
         }
       }
     } catch (error) {
@@ -165,7 +168,24 @@ export default function Sidebar({ handleLogout }) {
     fetchEmployeeDaysoffWeek();
     fetchEmployeeAvailablePeriods();
     fetchEmployeeDaysOff();
+    fetchAllEmployeeServices();
   }, []);
+
+  const fetchAllEmployeeServices = async () => {
+    try {
+      const res = await axios.get("http://localhost:3000/employee/services");
+      const rows = Array.isArray(res.data) ? res.data : [];
+      const map = {};
+      rows.forEach((r) => {
+        const email = r.employee_email;
+        if (!map[email]) map[email] = new Set();
+        map[email].add(r.service_name);
+      });
+      setEmployeeServicesMap(map);
+    } catch (err) {
+      console.error("Error fetching all employee services:", err);
+    }
+  };
 
   const fetchEmployeeDaysOff = async () => {
     try {
@@ -345,6 +365,11 @@ export default function Sidebar({ handleLogout }) {
     const availableEmployees = [];
 
     const isAnyEmployeeAvailable = employeeIds.some((employeeId) => {
+      // If a specific service is requested, skip employees who do not provide it
+      if (serviceName) {
+        const svcSet = employeeServicesMap[employeeId];
+        if (!svcSet || !svcSet.has(serviceName)) return false;
+      }
       const hasWeeklyDayOff = employeeDaysOffWeek.some((dayOffWeek) => {
         const dayOfWeekMapping = {
           sunday: 0,
@@ -516,6 +541,24 @@ export default function Sidebar({ handleLogout }) {
       setUserInitials(user.email.slice(0, 2).toUpperCase());
     }
   }, []);
+
+  // Récupère les services fournis par l'employé connecté
+  const fetchEmployeeProvidedServices = async (email) => {
+    try {
+      const res = await axios.get("http://localhost:3000/employee/services");
+      const all = res.data || [];
+      const provided = all
+        .filter((r) => r.employee_email === email)
+        .map((r) => r.service_name);
+      setEmployeeProvidedServices(new Set(provided));
+    } catch (err) {
+      console.error("Error fetching employee services:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (userEmail) fetchEmployeeProvidedServices(userEmail);
+  }, [userEmail]);
 
   const handleLogoutClick = () => {
     handleLogout(); // Appeler la fonction handleLogout reçue en prop
@@ -849,14 +892,23 @@ export default function Sidebar({ handleLogout }) {
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>Services</SelectLabel>
-                      {services.map((serviceItem) => (
-                        <SelectItem
-                          key={serviceItem.id}
-                          value={serviceItem.name}
-                        >
-                          {serviceItem.name}
-                        </SelectItem>
-                      ))}
+                      {services.map((serviceItem) => {
+                        const provided = employeeProvidedServices.has(
+                          serviceItem.name,
+                        );
+                        return (
+                          <SelectItem
+                            key={serviceItem.id}
+                            value={serviceItem.name}
+                            disabled={!provided}
+                          >
+                            <div className={provided ? "" : "text-gray-400"}>
+                              {serviceItem.name}
+                              {!provided && " (not offered)"}
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
                     </SelectGroup>
                   </SelectContent>
                 </Select>

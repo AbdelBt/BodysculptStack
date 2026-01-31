@@ -48,6 +48,7 @@ function App() {
   const [employeeDaysOff, setEmployeeDaysOff] = useState([]);
   const [employeeDaysOffWeek, setEmployeeDaysOffWeek] = useState([]);
   const [employeeAvailablePeriods, setEmployeeAvailablePeriods] = useState([]);
+  const [employeeServicesMap, setEmployeeServicesMap] = useState({});
   const [isOpen, setIsOpen] = useState(false);
   const [service, setService] = useState("");
 
@@ -141,7 +142,25 @@ function App() {
     fetchEmployeeDaysoffWeek();
     fetchEmployeeAvailablePeriods();
     fetchEmployeeDaysOff();
+    fetchAllEmployeeServices();
   }, []);
+
+  // Récupère la liste complète des services fournis par chaque employé
+  const fetchAllEmployeeServices = async () => {
+    try {
+      const res = await axios.get("http://localhost:3000/employee/services");
+      const rows = Array.isArray(res.data) ? res.data : [];
+      const map = {};
+      rows.forEach((r) => {
+        const email = r.employee_email;
+        if (!map[email]) map[email] = new Set();
+        map[email].add(r.service_name);
+      });
+      setEmployeeServicesMap(map);
+    } catch (err) {
+      console.error("Error fetching all employee services:", err);
+    }
+  };
 
   useEffect(() => {
     fetchUnavailableDays();
@@ -392,6 +411,11 @@ function App() {
     const availableEmployees = [];
 
     const isAnyEmployeeAvailable = employeeIds.some((employeeId) => {
+      // Si un service est demandé, ignorer les employés qui ne le fournissent pas
+      if (serviceName) {
+        const svcSet = employeeServicesMap[employeeId];
+        if (!svcSet || !svcSet.has(serviceName)) return false;
+      }
       const hasWeeklyDayOff = employeeDaysOffWeek.some((dayOffWeek) => {
         const dayOfWeekMapping = {
           sunday: 0,

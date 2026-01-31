@@ -22,6 +22,8 @@ export default function MyAvailabilities() {
   const [daysState, setDaysState] = useState([]);
   const [dayOffDate, setDayOffDate] = useState(null);
   const [daysOff, setDaysOff] = useState([]);
+  const [services, setServices] = useState([]);
+  const [employeeServices, setEmployeeServices] = useState({});
   const daysOfWeek = [
     "monday",
     "tuesday",
@@ -31,14 +33,15 @@ export default function MyAvailabilities() {
     "saturday",
     "sunday",
   ];
+  const user = JSON.parse(sessionStorage.getItem("user"));
 
   useEffect(() => {
-    const user = JSON.parse(sessionStorage.getItem("user"));
     if (!user) {
       navigate("/");
     } else {
       fetchDays(user.email);
       fetchDaysOff(user.email);
+      fetchServices(user.email);
     }
   }, [navigate]);
 
@@ -50,7 +53,7 @@ export default function MyAvailabilities() {
           params: {
             email: email,
           },
-        }
+        },
       );
       const daysData = response.data.reduce((acc, curr) => {
         acc[curr.day_of_week.toLowerCase()] = curr.available;
@@ -70,7 +73,7 @@ export default function MyAvailabilities() {
           params: {
             email: email,
           },
-        }
+        },
       );
       setDaysOff(response.data);
     } catch (error) {
@@ -184,7 +187,7 @@ export default function MyAvailabilities() {
     const existingDayOff = daysOff.find(
       (dayOff) =>
         new Date(dayOff.day_off_date).toLocaleDateString() ===
-        dayOffDate.toLocaleDateString()
+        dayOffDate.toLocaleDateString(),
     );
     if (existingDayOff) {
       toast({
@@ -202,7 +205,7 @@ export default function MyAvailabilities() {
         {
           email: JSON.parse(sessionStorage.getItem("user")).email,
           day_off_date: adjustedDayOffDate, // Utilisation de la date sélectionnée
-        }
+        },
       );
 
       toast({
@@ -226,7 +229,7 @@ export default function MyAvailabilities() {
   const handleDeleteDayOff = async (dayOffId) => {
     try {
       await axios.delete(
-        `https://bodysculptstack.onrender.com/employee/days-off/${dayOffId}`
+        `https://bodysculptstack.onrender.com/employee/days-off/${dayOffId}`,
       );
       toast({
         description: `Day off deleted successfully`,
@@ -242,6 +245,70 @@ export default function MyAvailabilities() {
         status: "error",
         className: "bg-[#ff0000]",
       });
+    }
+  };
+
+  // --- SERVICES ---
+  const fetchServices = async (email) => {
+    try {
+      const servicesRes = await axios.get(
+        "https://bodysculptstack.onrender.com/services",
+      );
+      setServices(servicesRes.data);
+
+      const empRes = await axios.get(
+        "http://localhost:3000/employee/services",
+        { params: { email } },
+      );
+      // empRes may return all employee-service rows; filter by the requested email
+      const empRows = Array.isArray(empRes.data) ? empRes.data : [];
+      const filteredForEmployee = empRows.filter(
+        (r) => r.employee_email === email,
+      );
+      const empServicesObj = filteredForEmployee.reduce((acc, curr) => {
+        acc[curr.service_name] = true;
+        return acc;
+      }, {});
+      setEmployeeServices(empServicesObj);
+    } catch (error) {
+      console.error("Error fetching services:", error);
+      toast({
+        description: "Failed to fetch services",
+        status: "error",
+        className: "bg-red-500",
+      });
+    }
+  };
+
+  const handleServiceChange = async (serviceName) => {
+    const isChecked = !employeeServices[serviceName];
+    setEmployeeServices((prev) => ({ ...prev, [serviceName]: isChecked }));
+
+    try {
+      if (isChecked) {
+        await axios.post("http://localhost:3000/employee/add-service", {
+          employee_email: user.email,
+          service_name: serviceName,
+        });
+      } else {
+        await axios.delete("http://localhost:3000/employee/remove-service", {
+          data: { employee_email: user.email, service_name: serviceName },
+        });
+      }
+
+      toast({
+        description: `Service "${serviceName}" ${isChecked ? "added" : "removed"} successfully`,
+        status: "success",
+        className: "bg-[#008000]",
+      });
+    } catch (err) {
+      console.error("Error updating service:", err);
+      toast({
+        description: `Failed to update service "${serviceName}"`,
+        status: "error",
+        className: "bg-red-500",
+      });
+      setEmployeeServices((prev) => ({ ...prev, [serviceName]: !isChecked }));
     }
   };
 
@@ -307,7 +374,7 @@ export default function MyAvailabilities() {
                           weekday: "long",
                           day: "numeric",
                           month: "long",
-                        }
+                        },
                       )}
                     </div>
                     <Trash2
@@ -328,6 +395,22 @@ export default function MyAvailabilities() {
         </Button>
         <Toaster />
       </div>
+      <div className="flex flex-col mt-5">
+        <h1 className="text-2xl font-bold mb-5">Employee Services</h1>
+        <div className="flex flex-col gap-2 bg-black p-4 border rounded">
+          {services.map((service) => (
+            <div key={service.id} className="flex items-center gap-2">
+              <Checkbox
+                id={service.name}
+                checked={employeeServices[service.name] || false}
+                onCheckedChange={() => handleServiceChange(service.name)}
+              />
+              <Label htmlFor={service.name}>{service.name}</Label>
+            </div>
+          ))}
+        </div>
+      </div>
+      <Toaster />
     </div>
   );
 }

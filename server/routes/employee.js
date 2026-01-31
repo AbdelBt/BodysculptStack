@@ -319,7 +319,84 @@ router.delete('/days-off/:id', async (req, res) => {
     }
 });
 
+router.get('/services', async (req, res) => {
+    const { data, error } = await supabase
+        .from('employee_services')
+        .select('*');
 
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json(data);
+});
+
+router.post("/add-service", async (req, res) => {
+    try {
+        const { employee_email, service_name } = req.body;
+
+        if (!employee_email || !service_name) {
+            return res.status(400).json({ error: "Missing email or service_name" });
+        }
+
+        // Vérifier si le service existe déjà pour cet employé
+        const { data: existing, error: fetchError } = await supabase
+            .from("employee_services")
+            .select("*")
+            .eq("employee_email", employee_email)
+            .eq("service_name", service_name)
+            .maybeSingle();
+        if (fetchError) {
+            return res.status(500).json({ error: fetchError.message });
+        }
+
+        if (existing) {
+            return res
+                .status(409)
+                .json({ error: "This service is already assigned to the employee" });
+        }
+
+        // Ajouter le service
+        const { data, error } = await supabase
+            .from("employee_services")
+            .insert([{ employee_email, service_name }])
+            .select();
+
+        if (error) throw error;
+
+        res.status(200).json({ message: "Service added successfully", data });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Failed to add service" });
+    }
+});
+
+
+router.delete("/remove-service", async (req, res) => {
+    try {
+        const { employee_email, service_name } = req.body;
+
+        if (!employee_email || !service_name) {
+            return res.status(400).json({ error: "Email and service name required" });
+        }
+
+        const { data, error } = await supabase
+            .from("employee_services")
+            .delete()
+            .eq("employee_email", employee_email)
+            .eq("service_name", service_name);
+
+        if (error) {
+            console.error(error);
+            return res.status(500).json({ error: "Failed to delete service" });
+        }
+
+        res.json({ message: `Service "${service_name}" removed successfully` });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
 
 
 
