@@ -330,7 +330,7 @@ export default function Sidebar({ handleLogout }) {
 
         timeList.push({ time, isUnavailable });
 
-        const step = 90; // 90 minutes
+        const step = getServiceDuration(service) || 90; // minutes (60 for kshape)
         currentTotalMinutes += step;
       }
 

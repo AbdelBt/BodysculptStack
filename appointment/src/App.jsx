@@ -156,7 +156,14 @@ function App() {
       rows.forEach((r) => {
         const email = r.employee_email;
         if (!map[email]) map[email] = new Set();
-        map[email].add(r.service_name);
+        const svc = (r.service_name || "")
+          .toString()
+          .trim()
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+        // fallback: if normalized svc is empty, store original
+        map[email].add(svc || r.service_name || "");
       });
       setEmployeeServicesMap(map);
     } catch (err) {
@@ -359,7 +366,7 @@ function App() {
 
       const timeList = [];
       let currentTotalMinutes = startTotalMinutes;
-      const step = 90; //  90 minutes
+      const step = getServiceDuration(service) || 90; // minutes (60 for kshape)
 
       while (currentTotalMinutes <= endTotalMinutes) {
         const currentHour = Math.floor(currentTotalMinutes / 60);
@@ -416,7 +423,15 @@ function App() {
       // Si un service est demandé, ignorer les employés qui ne le fournissent pas
       if (serviceName) {
         const svcSet = employeeServicesMap[employeeId];
-        if (!svcSet || !svcSet.has(serviceName)) return false;
+        if (!svcSet) return false;
+        const serviceNorm = (serviceName || service || "")
+          .toString()
+          .trim()
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+        // allow match against normalized stored names or original name as fallback
+        if (!svcSet.has(serviceNorm) && !svcSet.has(serviceName)) return false;
       }
       const hasWeeklyDayOff = employeeDaysOffWeek.some((dayOffWeek) => {
         const dayOfWeekMapping = {
@@ -593,7 +608,7 @@ function App() {
       let currentTotalMinutes = startTotalMinutes;
       const timeList = [];
 
-      const step = 90;
+      const step = getServiceDuration(service);
 
       while (currentTotalMinutes <= endTotalMinutes) {
         const currentHour = Math.floor(currentTotalMinutes / 60);
@@ -621,6 +636,7 @@ function App() {
       workingHours,
       specialDays,
       isTimeUnavailableForDate,
+      getServiceDuration,
       service,
     ],
   );
@@ -644,24 +660,15 @@ function App() {
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "");
 
-  const getServiceDuration = (serviceName) => {
+  function getServiceDuration(serviceName) {
     if (!serviceName && !service) return 90; // default 90min when no service selected
     const nameNorm = normalizeStr(serviceName || service || "");
-    const sixtyTokens = [
-      "dissolution",
-      "eye",
-      "booster",
-      "mesocellule",
-      "meso",
-      "messo",
-      "vergeture",
-      "kshape",
-    ];
+    const sixtyTokens = ["kshape"];
 
     return sixtyTokens.some((t) => nameNorm.includes(normalizeStr(t)))
       ? 60
       : 90;
-  };
+  }
 
   const formatPhoneNumber = (number) => {
     if (!number.startsWith("+")) {
