@@ -176,7 +176,7 @@ router.post("/", async (req, res) => {
         <p>Merci de nous avoir choisis.</p>
         <p>Cordialement,<br>L'equipe Body Sculpt By Maya</p>
           <div style="text-align: center; ">
-          <img src="https://i.goopics.net/vc61ff.png" alt="Logo" style="max-width: 200px;">
+          <img src="https://www.bodysculptbymaya.com/assets/Logo-D1rs9X4s.png" alt="Logo" style="max-width: 200px;">
         </div>
       </body>
     </html>
@@ -259,7 +259,7 @@ router.post("/appointment", async (req, res) => {
                 <p>Merci de nous avoir choisis.</p>
                 <p>Cordialement,<br>L'équipe Body Sculpt By Maya</p>
                 <div style="text-align: center;">
-                  <img src="https://i.goopics.net/vc61ff.png" alt="Logo" style="max-width: 200px;">
+                  <img src="https://www.bodysculptbymaya.com/assets/Logo-D1rs9X4s.png" alt="Logo" style="max-width: 200px;">
                 </div>
               </body>
             </html>
@@ -370,7 +370,7 @@ router.post("/:id/status", async (req, res) => {
                             <p>Merci de nous avoir prévenus.</p>
                             <p>Cordialement,<br>L'équipe Body Sculpt By Maya</p>
                             <div style="text-align: center;">
-                                <img src="https://i.goopics.net/vc61ff.png" alt="Logo" style="max-width: 200px;">
+                                <img src="https://www.bodysculptbymaya.com/assets/Logo-D1rs9X4s.png" alt="Logo" style="max-width: 200px;">
                             </div>
                         </body>
                     </html>
