@@ -41,7 +41,7 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const getAvailableEmployeForTimeSlot = async (date, timeSlot) => {
+const getAvailableEmployeForTimeSlot = async (date, timeSlot, service) => {
     try {
         // Récupérer tous les utilisateurs
         const { data: allUsers, error: fetchUsersError } = await supabase.auth.admin.listUsers()
@@ -52,6 +52,24 @@ const getAvailableEmployeForTimeSlot = async (date, timeSlot) => {
 
         // Parcourir tous les employés pour trouver un employé disponible
         for (const user of allUsers.users) {
+            // Si un service est demandé, vérifier que l'employé propose ce service
+            if (service) {
+                const { data: serviceData, error: serviceFetchError } = await supabase
+                    .from("employee_services")
+                    .select("*")
+                    .eq("employee_email", user.email)
+                    .eq("service_name", service);
+
+                if (serviceFetchError) {
+                    throw serviceFetchError;
+                }
+
+                // Passer cet employé s'il n'offre pas le service demandé
+                if (!serviceData || serviceData.length === 0) {
+                    continue;
+                }
+            }
+
             // Vérifier s'il existe des indisponibilités pour cet employé à ce créneau horaire
             const { data: existingIndisponibilities, error: fetchError } = await supabase
                 .from("reservations")
@@ -106,7 +124,7 @@ router.post("/", async (req, res) => {
         } = req.body;
 
 
-        const email = await getAvailableEmployeForTimeSlot(date, timeSlot);
+        const email = await getAvailableEmployeForTimeSlot(date, timeSlot, service);
 
         if (!email) {
             return res.status(400).json({ error: "Aucun employé disponible pour ce créneau." });
@@ -192,7 +210,7 @@ router.post("/appointment", async (req, res) => {
         } = req.body;
 
 
-        const email = await getAvailableEmployeForTimeSlot(date, timeSlot);
+        const email = await getAvailableEmployeForTimeSlot(date, timeSlot, service);
 
         if (!email) {
             return res.status(400).json({ error: "Aucun employé disponible pour ce créneau." });
@@ -364,7 +382,7 @@ router.post("/:id/status", async (req, res) => {
 
         } else if ((status === "pending" || status === "confirmed") && !currentReservation.employe_email) {
             // Si le statut est "pending" ou "confirm" et qu'aucun employé n'est assigné, trouver un employé disponible
-            const email = await getAvailableEmployeForTimeSlot(currentReservation.date, currentReservation.time_slot);
+            const email = await getAvailableEmployeForTimeSlot(currentReservation.date, currentReservation.time_slot, currentReservation.service);
             if (!email) {
                 return res.status(400).json({ error: "Aucun employé disponible pour ce créneau." });
             }
