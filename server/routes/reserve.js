@@ -21,7 +21,6 @@ const sendEmail = async (mailOptions) => {
         };
 
         const [response] = await sgMail.send(msg);
-        await new Promise(resolve => setTimeout(resolve, 400));
         console.log("E-mail envoyé avec succès:", response.statusCode);
         console.log("Headers:", response.headers);
     } catch (error) {
