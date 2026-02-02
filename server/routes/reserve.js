@@ -21,6 +21,7 @@ const sendEmail = async (mailOptions) => {
         };
 
         const [response] = await sgMail.send(msg);
+        await new Promise(resolve => setTimeout(resolve, 400));
         console.log("E-mail envoyé avec succès:", response.statusCode);
         console.log("Headers:", response.headers);
     } catch (error) {
@@ -28,14 +29,7 @@ const sendEmail = async (mailOptions) => {
     }
 };
 
-const mailOptions = {
-    to: "abdella.boutaarourt@hotmail.com",
-    subject: "Test envoi SendGrid",
-    html: "<p>Test d'envoi depuis SendGrid</p>"
-};
-(async () => {
-    await sendEmail(mailOptions);
-})();
+
 // Supabase configuration
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
