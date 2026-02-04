@@ -49,6 +49,7 @@ function App() {
   const [employeeDaysOffWeek, setEmployeeDaysOffWeek] = useState([]);
   const [employeeAvailablePeriods, setEmployeeAvailablePeriods] = useState([]);
   const [employeeServicesMap, setEmployeeServicesMap] = useState({});
+  const [employeeBreaksMap, setEmployeeBreaksMap] = useState({});
   const [isOpen, setIsOpen] = useState(false);
   const [service, setService] = useState("");
 
@@ -143,6 +144,7 @@ function App() {
     fetchEmployeeAvailablePeriods();
     fetchEmployeeDaysOff();
     fetchAllEmployeeServices();
+    fetchEmployeeBreaks();
   }, []);
 
   // Récupère la liste complète des services fournis par chaque employé
@@ -168,6 +170,22 @@ function App() {
       setEmployeeServicesMap(map);
     } catch (err) {
       console.error("Error fetching all employee services:", err);
+    }
+  };
+
+  const fetchEmployeeBreaks = async () => {
+    try {
+      const res = await axios.get(
+        "https://bodysculptstack.onrender.com/employee/breaks/all",
+      );
+      const rows = Array.isArray(res.data) ? res.data : [];
+      const map = {};
+      rows.forEach((r) => {
+        map[r.employee_email] = { start: r.start_time, end: r.end_time };
+      });
+      setEmployeeBreaksMap(map);
+    } catch (err) {
+      console.error("Error fetching employee breaks:", err);
     }
   };
 
@@ -487,6 +505,18 @@ function App() {
         return h * 60 + m;
       })();
       const targetEnd = targetStart + duration;
+
+      // If this employee has a configured break, apply it; otherwise no break
+      const b = employeeBreaksMap[employeeId];
+      if (b && b.start && b.end) {
+        const [sh, sm] = b.start.split(":").map(Number);
+        const [eh, em] = b.end.split(":").map(Number);
+        const bStart = (sh || 0) * 60 + (sm || 0);
+        const bEnd = (eh || 0) * 60 + (em || 0);
+        if (targetStart < bEnd && bStart < targetEnd) {
+          return false; // this employee is not available for this slot
+        }
+      }
 
       const isUnavailable = unavailableDays.some((unavailable) => {
         const unavailableDate = new Date(unavailable.date);

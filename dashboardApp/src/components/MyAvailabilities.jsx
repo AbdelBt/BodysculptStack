@@ -84,7 +84,7 @@ export default function MyAvailabilities() {
 
     // fetch personal break from server and store in state for rendering
     axios
-      .get("http://localhost:3000/employee/breaks", {
+      .get("https://bodysculptstack.onrender.com/employee/breaks", {
         params: { email: user.email },
       })
       .then((res) => {
@@ -355,7 +355,7 @@ export default function MyAvailabilities() {
   const handleSaveBreak = () => {
     if (!user) return;
     axios
-      .post("http://localhost:3000/employee/breaks", {
+      .post("https://bodysculptstack.onrender.com/employee/breaks", {
         employee_email: user.email,
         start_time: breakStart,
         end_time: breakEnd,

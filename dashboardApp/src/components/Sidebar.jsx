@@ -175,7 +175,9 @@ export default function Sidebar({ handleLogout }) {
 
   const fetchEmployeeBreaks = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/employee/breaks/all");
+      const res = await axios.get(
+        "https://bodysculptstack.onrender.com/employee/breaks/all",
+      );
       const rows = Array.isArray(res.data) ? res.data : [];
       const map = {};
       rows.forEach((r) => {
