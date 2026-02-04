@@ -398,6 +398,82 @@ router.delete("/remove-service", async (req, res) => {
     }
 });
 
+// Get all breaks
+router.get('/breaks/all', async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('employee_breaks')
+            .select('*');
+
+        if (error) throw error;
+
+        res.status(200).json(data);
+    } catch (error) {
+        console.error('Error fetching employee breaks:', error.message);
+        res.status(500).json({ error: 'Failed to fetch employee breaks' });
+    }
+});
+
+// Get break for a single employee
+router.get('/breaks', async (req, res) => {
+    try {
+        const { email } = req.query;
+        const { data, error } = await supabase
+            .from('employee_breaks')
+            .select('*')
+            .eq('employee_email', email);
+
+        if (error) throw error;
+
+        res.status(200).json(data);
+    } catch (error) {
+        console.error('Error fetching employee break:', error.message);
+        res.status(500).json({ error: 'Failed to fetch employee break' });
+    }
+});
+
+// Upsert break for an employee
+router.post('/breaks', async (req, res) => {
+    try {
+        const { employee_email, start_time, end_time } = req.body;
+        if (!employee_email || !start_time || !end_time) {
+            return res.status(400).json({ error: 'Missing parameters' });
+        }
+
+        // check existing
+        const { data: existing, error: fetchError } = await supabase
+            .from('employee_breaks')
+            .select('*')
+            .eq('employee_email', employee_email);
+
+        if (fetchError) throw fetchError;
+
+        if (existing && existing.length > 0) {
+            const id = existing[0].id;
+            const { data, error } = await supabase
+                .from('employee_breaks')
+                .update({ start_time, end_time })
+                .eq('id', id)
+                .select()
+                .single();
+            if (error) throw error;
+            return res.status(200).json(data);
+        }
+
+        const { data, error } = await supabase
+            .from('employee_breaks')
+            .insert([{ employee_email, start_time, end_time }])
+            .select()
+            .single();
+
+        if (error) throw error;
+        res.status(201).json(data);
+    } catch (error) {
+        console.error('Error saving employee break:', error.message);
+        res.status(500).json({ error: 'Failed to save employee break' });
+    }
+});
+
 
 
 

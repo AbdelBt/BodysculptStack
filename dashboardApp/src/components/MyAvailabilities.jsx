@@ -24,6 +24,9 @@ export default function MyAvailabilities() {
   const [daysOff, setDaysOff] = useState([]);
   const [services, setServices] = useState([]);
   const [employeeServices, setEmployeeServices] = useState({});
+  const [breakStart, setBreakStart] = useState("");
+  const [breakEnd, setBreakEnd] = useState("");
+  const [employeeBreak, setEmployeeBreak] = useState(null);
   const daysOfWeek = [
     "monday",
     "tuesday",
@@ -41,9 +44,70 @@ export default function MyAvailabilities() {
     } else {
       fetchDays(user.email);
       fetchDaysOff(user.email);
-      fetchServices(user.email);
     }
-  }, [navigate]);
+  }, [navigate, user]);
+
+  // load services and personal break when user is available
+  useEffect(() => {
+    if (!user || !user.email) return;
+
+    // fetch services and employee services for this user
+    (async () => {
+      try {
+        const servicesRes = await axios.get(
+          "https://bodysculptstack.onrender.com/services",
+        );
+        setServices(servicesRes.data);
+
+        const empRes = await axios.get(
+          "https://bodysculptstack.onrender.com/employee/services",
+          { params: { email: user.email } },
+        );
+        const empRows = Array.isArray(empRes.data) ? empRes.data : [];
+        const filteredForEmployee = empRows.filter(
+          (r) => r.employee_email === user.email,
+        );
+        const empServicesObj = filteredForEmployee.reduce((acc, curr) => {
+          acc[curr.service_name] = true;
+          return acc;
+        }, {});
+        setEmployeeServices(empServicesObj);
+      } catch (error) {
+        console.error("Error fetching services:", error);
+        toast({
+          description: "Failed to fetch services",
+          status: "error",
+          className: "bg-red-500",
+        });
+      }
+    })();
+
+    // fetch personal break from server and store in state for rendering
+    axios
+      .get("http://localhost:3000/employee/breaks", {
+        params: { email: user.email },
+      })
+      .then((res) => {
+        const rows = Array.isArray(res.data) ? res.data : [];
+        if (rows.length > 0) {
+          const b = rows[0];
+          setEmployeeBreak(b);
+          if (b.start_time) setBreakStart(b.start_time);
+          if (b.end_time) setBreakEnd(b.end_time);
+        } else {
+          setEmployeeBreak(null);
+          setBreakStart("");
+          setBreakEnd("");
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching personal break from server", err);
+        setEmployeeBreak(null);
+        setBreakStart("");
+        setBreakEnd("");
+      });
+  }, [user?.email]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   const fetchDays = async (email) => {
     try {
@@ -248,37 +312,7 @@ export default function MyAvailabilities() {
     }
   };
 
-  // --- SERVICES ---
-  const fetchServices = async (email) => {
-    try {
-      const servicesRes = await axios.get(
-        "https://bodysculptstack.onrender.com/services",
-      );
-      setServices(servicesRes.data);
-
-      const empRes = await axios.get(
-        "https://bodysculptstack.onrender.com/employee/services",
-        { params: { email } },
-      );
-      // empRes may return all employee-service rows; filter by the requested email
-      const empRows = Array.isArray(empRes.data) ? empRes.data : [];
-      const filteredForEmployee = empRows.filter(
-        (r) => r.employee_email === email,
-      );
-      const empServicesObj = filteredForEmployee.reduce((acc, curr) => {
-        acc[curr.service_name] = true;
-        return acc;
-      }, {});
-      setEmployeeServices(empServicesObj);
-    } catch (error) {
-      console.error("Error fetching services:", error);
-      toast({
-        description: "Failed to fetch services",
-        status: "error",
-        className: "bg-red-500",
-      });
-    }
-  };
+  // Services are loaded in the effect when `user` is available
 
   const handleServiceChange = async (serviceName) => {
     const isChecked = !employeeServices[serviceName];
@@ -318,104 +352,187 @@ export default function MyAvailabilities() {
     }
   };
 
+  const handleSaveBreak = () => {
+    if (!user) return;
+    axios
+      .post("http://localhost:3000/employee/breaks", {
+        employee_email: user.email,
+        start_time: breakStart,
+        end_time: breakEnd,
+      })
+      .then((res) => {
+        const b = res.data;
+        if (!b) {
+          console.error("Save returned null or empty data", res.data);
+          toast({
+            description: `Saved but server returned no break data`,
+            status: "warning",
+            className: "bg-yellow-500",
+          });
+          return;
+        }
+        setEmployeeBreak(b);
+        if (b.start_time) setBreakStart(b.start_time);
+        if (b.end_time) setBreakEnd(b.end_time);
+        toast({
+          description: `Break saved: ${b.start_time || breakStart} - ${b.end_time || breakEnd}`,
+          status: "success",
+          className: "bg-[#008000]",
+        });
+      })
+      .catch((err) => {
+        console.error("Error saving break to server", err);
+        toast({
+          description: `Failed to save break`,
+          status: "error",
+          className: "bg-red-500",
+        });
+      });
+  };
+
   return (
-    <div className="flex flex-col w-full min-h-min justify-center items-center px-10 gap-2  xl:gap-20 text-white lg:flex-row">
-      <div className="flex flex-col">
-        <h1 className="text-2xl font-bold mb-5"> My Available Dates</h1>
-        <div className="flex flex-col border border-indigo-500 p-2 rounded bg-black">
-          <div className="flex justify-center  w-full items-center flex-col">
-            <div>
-              {" "}
-              <CardHeader className="space-y-1">
-                <CardTitle className="text-md">Available Days:</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex  sm:flex-row flex-col gap-4">
-                  {daysOfWeek.map((day) => (
-                    <div key={day} className="flex items-center">
-                      <Checkbox
-                        id={day}
-                        checked={daysState[day]}
-                        onCheckedChange={() => handleDayChange(day)}
-                      />
-                      <Label htmlFor={day} className="ml-2 capitalize">
-                        {day}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </div>
-
-            <DatePickerWithRange
-              className="w-full mt-8"
-              onSelect={setDateRange}
-              eyeIcon={eyeIcon}
-              setEyeIcon={setEyeIcon}
-            />
-          </div>
-
-          <div className="mt-5">
-            <Button type="submit" onClick={handleChangeAvailableDates}>
-              Change date
-            </Button>
-          </div>
-        </div>
-      </div>
-      <div>
-        <div className="flex flex-col mt-5">
-          <h1 className="text-2xl font-bold mb-5">Employee Days OFF</h1>
-          <ScrollArea className="h-72  rounded-md border bg-black">
-            <div className="p-4">
-              <h4 className="mb-4 text-sm font-medium leading-none">
-                Days Off
-              </h4>
-              {daysOff.map((dayOff) => (
-                <div key={dayOff.id}>
-                  <div className="text-sm flex flex-row-reverse justify-start">
-                    <div className="flex justify-center w-full">
-                      {new Date(dayOff.day_off_date).toLocaleDateString(
-                        "fr-FR",
-                        {
-                          weekday: "long",
-                          day: "numeric",
-                          month: "long",
-                        },
-                      )}
-                    </div>
-                    <Trash2
-                      className="pb-2 text-red-500 cursor-pointer hover:scale-150"
-                      onClick={() => handleDeleteDayOff(dayOff.id)}
-                    />{" "}
+    <div className="flex flex-col w-full min-h-min justify-center items-center px-10 gap-2  xl:gap-2">
+      <div className="flex flex-col w-full min-h-min justify-center items-center px-10 gap-2  xl:gap-20 text-white lg:flex-row">
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-bold mb-5"> My Available Dates</h1>
+          <div className="flex flex-col border border-indigo-500 p-2 rounded bg-black">
+            <div className="flex justify-center  w-full items-center flex-col">
+              <div>
+                {" "}
+                <CardHeader className="space-y-1">
+                  <CardTitle className="text-md">Available Days:</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex  sm:flex-row flex-col gap-4">
+                    {daysOfWeek.map((day) => (
+                      <div key={day} className="flex items-center">
+                        <Checkbox
+                          id={day}
+                          checked={daysState[day]}
+                          onCheckedChange={() => handleDayChange(day)}
+                        />
+                        <Label htmlFor={day} className="ml-2 capitalize">
+                          {day}
+                        </Label>
+                      </div>
+                    ))}
                   </div>
+                </CardContent>
+              </div>
 
-                  <Separator className="my-2" />
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
-          <DatePickerDemo onSelect={setDayOffDate} />
-        </div>
-        <Button type="submit" className="my-5" onClick={handleAddDayOff}>
-          Add Day Off
-        </Button>
-        <Toaster />
-      </div>
-      <div className="flex flex-col mt-5">
-        <h1 className="text-2xl font-bold mb-5">Employee Services</h1>
-        <div className="flex flex-col gap-2 bg-black p-4 border rounded">
-          {services.map((service) => (
-            <div key={service.id} className="flex items-center gap-2">
-              <Checkbox
-                id={service.name}
-                checked={employeeServices[service.name] || false}
-                onCheckedChange={() => handleServiceChange(service.name)}
+              <DatePickerWithRange
+                className="w-full mt-8"
+                onSelect={setDateRange}
+                eyeIcon={eyeIcon}
+                setEyeIcon={setEyeIcon}
               />
-              <Label htmlFor={service.name}>{service.name}</Label>
             </div>
-          ))}
+
+            <div className="mt-5">
+              <Button type="submit" onClick={handleChangeAvailableDates}>
+                Change date
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div className="flex flex-col mt-5">
+            <h1 className="text-2xl font-bold mb-5">Employee Days OFF</h1>
+            <ScrollArea className="h-72  rounded-md border bg-black">
+              <div className="p-4">
+                <h4 className="mb-4 text-sm font-medium leading-none">
+                  Days Off
+                </h4>
+                {daysOff.map((dayOff) => (
+                  <div key={dayOff.id}>
+                    <div className="text-sm flex flex-row-reverse justify-start">
+                      <div className="flex justify-center w-full">
+                        {new Date(dayOff.day_off_date).toLocaleDateString(
+                          "fr-FR",
+                          {
+                            weekday: "long",
+                            day: "numeric",
+                            month: "long",
+                          },
+                        )}
+                      </div>
+                      <Trash2
+                        className="pb-2 text-red-500 cursor-pointer hover:scale-150"
+                        onClick={() => handleDeleteDayOff(dayOff.id)}
+                      />{" "}
+                    </div>
+
+                    <Separator className="my-2" />
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <DatePickerDemo onSelect={setDayOffDate} />
+          </div>
+          <Button type="submit" className="my-5" onClick={handleAddDayOff}>
+            Add Day Off
+          </Button>
+          <Toaster />
         </div>
       </div>
+
+      <div className="flex flex-row w-full  min-h-min justify-center items-center px-10 gap-2  xl:gap-20  text-white">
+        <div className="flex flex-col mt-5">
+          <h1 className="text-2xl font-bold mb-5">Personal Break (pause)</h1>
+          <div className="flex items-center gap-2 bg-black p-4 border rounded">
+            <div className="flex flex-col">
+              <Label>Start</Label>
+              <input
+                type="time"
+                value={breakStart}
+                onChange={(e) => setBreakStart(e.target.value)}
+                className="bg-white text-black rounded p-1"
+              />
+            </div>
+            <div className="flex flex-col">
+              <Label>End</Label>
+              <input
+                type="time"
+                value={breakEnd}
+                onChange={(e) => setBreakEnd(e.target.value)}
+                className="bg-white text-black rounded p-1"
+              />
+            </div>
+            <div className="ml-4 self-center text-sm text-gray-300">
+              {employeeBreak
+                ? // show 'Current' when inputs differ from saved values
+                  breakStart !== (employeeBreak.start_time || "") ||
+                  breakEnd !== (employeeBreak.end_time || "")
+                  ? `Current: ${breakStart || "--:--"} - ${breakEnd || "--:--"}`
+                  : `Saved: ${employeeBreak.start_time} - ${employeeBreak.end_time}`
+                : // no saved break, show current inputs or placeholder
+                  breakStart || breakEnd
+                  ? `Current: ${breakStart || "--:--"} - ${breakEnd || "--:--"}`
+                  : "No saved break"}
+            </div>
+            <div className="flex items-end">
+              <Button onClick={handleSaveBreak}>Save Break</Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col mt-5">
+          <h1 className="text-2xl font-bold mb-5">Employee Services</h1>
+          <div className="flex flex-col gap-2 bg-black p-4 border rounded">
+            {services.map((service) => (
+              <div key={service.id} className="flex items-center gap-2">
+                <Checkbox
+                  id={service.name}
+                  checked={employeeServices[service.name] || false}
+                  onCheckedChange={() => handleServiceChange(service.name)}
+                />
+                <Label htmlFor={service.name}>{service.name}</Label>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <Toaster />
     </div>
   );

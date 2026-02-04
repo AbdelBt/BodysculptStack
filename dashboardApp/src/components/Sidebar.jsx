@@ -72,6 +72,7 @@ export default function Sidebar({ handleLogout }) {
   const [employeeDaysOffWeek, setEmployeeDaysOffWeek] = useState([]);
   const [employeeAvailablePeriods, setEmployeeAvailablePeriods] = useState([]);
   const [employeeServicesMap, setEmployeeServicesMap] = useState({});
+  const [employeeBreaksMap, setEmployeeBreaksMap] = useState({});
   const [availableDateRange, setAvailableDateRange] = useState({
     from: null,
     to: null,
@@ -169,7 +170,22 @@ export default function Sidebar({ handleLogout }) {
     fetchEmployeeAvailablePeriods();
     fetchEmployeeDaysOff();
     fetchAllEmployeeServices();
+    fetchEmployeeBreaks();
   }, []);
+
+  const fetchEmployeeBreaks = async () => {
+    try {
+      const res = await axios.get("http://localhost:3000/employee/breaks/all");
+      const rows = Array.isArray(res.data) ? res.data : [];
+      const map = {};
+      rows.forEach((r) => {
+        map[r.employee_email] = { start: r.start_time, end: r.end_time };
+      });
+      setEmployeeBreaksMap(map);
+    } catch (err) {
+      console.error("Error fetching employee breaks:", err);
+    }
+  };
 
   const fetchAllEmployeeServices = async () => {
     try {
@@ -366,6 +382,15 @@ export default function Sidebar({ handleLogout }) {
     const duration = getServiceDuration(serviceName);
     const availableEmployees = [];
 
+    // compute numeric target start/end once for the requested time
+    const targetStart = (() => {
+      const [h, m] = time.split(":").map(Number);
+      return h * 60 + m;
+    })();
+    const targetEnd = targetStart + duration;
+
+    // Determine break for each employee from fetched breaks map; if no break configured, do not apply any break
+
     const isAnyEmployeeAvailable = employeeIds.some((employeeId) => {
       // If a specific service is requested, skip employees who do not provide it
       if (serviceName) {
@@ -418,11 +443,17 @@ export default function Sidebar({ handleLogout }) {
 
       if (!isWithinAvailablePeriod) return false;
 
-      const targetStart = (() => {
-        const [h, m] = time.split(":").map(Number);
-        return h * 60 + m;
-      })();
-      const targetEnd = targetStart + duration;
+      // If this employee has a configured break, apply it; otherwise no break
+      const b = employeeBreaksMap[employeeId];
+      if (b && b.start && b.end) {
+        const [sh, sm] = b.start.split(":").map(Number);
+        const [eh, em] = b.end.split(":").map(Number);
+        const bStart = (sh || 0) * 60 + (sm || 0);
+        const bEnd = (eh || 0) * 60 + (em || 0);
+        if (targetStart < bEnd && bStart < targetEnd) {
+          return false; // this employee is not available for this slot
+        }
+      }
 
       const isUnavailable = unavailableDays.some((unavailable) => {
         const unavailableDate = new Date(unavailable.date);
