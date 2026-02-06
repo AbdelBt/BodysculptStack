@@ -4,30 +4,27 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const cron = require("node-cron");
 
 const router = express.Router();
-const sgMail = require('@sendgrid/mail');
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const { Resend } = require("resend");
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEmail = async (mailOptions) => {
     try {
-        const msg = {
+        const from = "Body Sculpt By Maya <noreply@bodysculptbymaya.com>";
+
+        const response = await resend.emails.send({
+            from,
             to: mailOptions.to,
-            from: {
-                name: "Body Sculpt By Maya",
-                email: "noreply@bodysculptbymaya.com"
-            },
             subject: mailOptions.subject,
             html: mailOptions.html,
-            replyTo: "noreply@bodysculptbymaya.com"
-        };
+            reply_to: "noreply@bodysculptbymaya.com",
+        });
 
-        const [response] = await sgMail.send(msg);
-        console.log("E-mail envoyé avec succès:", response.statusCode);
-        console.log("Headers:", response.headers);
+        console.log("E-mail envoyé avec succès:", response);
+        return response;
     } catch (error) {
-        console.error("Erreur lors de l'envoi de l'e-mail:", error.response?.body || error);
+        throw error;
     }
 };
-
 
 // Supabase configuration
 const supabaseUrl = process.env.SUPABASE_URL;
