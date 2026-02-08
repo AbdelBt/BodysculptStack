@@ -4,7 +4,6 @@ import axios from "axios";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { Textarea } from "@/components/ui/textarea";
-import { loadStripe } from "@stripe/stripe-js";
 
 import {
   AlertDialog,
@@ -33,10 +32,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 
-const stripePromise = loadStripe(
-  "pk_live_51M6KDPDnPugJ1SbJ31IM2DX4xId4Tuw4YWFl1SacYgpzmN7SKHpBRRb9CEE0iazw5cIBOjnJ5SylWGiSorO4p51R00DH3I6Ldt",
-);
-
 function App() {
   const { toast } = useToast();
   const [employeeIds, setEmployeeIds] = useState([]);
@@ -50,8 +45,8 @@ function App() {
   const [employeeAvailablePeriods, setEmployeeAvailablePeriods] = useState([]);
   const [employeeServicesMap, setEmployeeServicesMap] = useState({});
   const [employeeBreaksMap, setEmployeeBreaksMap] = useState({});
-  const [isOpen, setIsOpen] = useState(false);
   const [service, setService] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     fetchDays();
@@ -217,25 +212,36 @@ function App() {
   };
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sessionId = urlParams.get("session_id");
-
     const fetchReservationData = async () => {
-      // if same session
-
       if (window.location.href.includes("success")) {
+        const storagePaymentId = localStorage.getItem("molliePaymentId");
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentId = urlParams.get("payment_id") || storagePaymentId;
+
         const lastSessionId = sessionStorage.getItem("lastSessionId");
 
-        if (lastSessionId === sessionId) {
-          console.log("Reservation déjà traitée pour ce session_id");
+        if (!paymentId) {
+          console.log("Aucun payment_id trouvé");
+          return;
+        }
+
+        if (lastSessionId === paymentId) {
+          console.log("Reservation déjà traitée pour ce payment_id");
           return;
         }
 
         try {
           const response = await axios.get(
-            `https://bodysculptstack.onrender.com/success?session_id=${sessionId}`,
+            `https://bodysculptstack.onrender.com/success?payment_id=${paymentId}`,
           );
           const reservationData = response.data.reservation;
+
+          if (!reservationData) {
+            console.error(
+              "Aucune donnée de réservation retournée par /success",
+            );
+            return;
+          }
 
           // Formatage de la date pour affichage
           const formattedDate = new Date(reservationData.date);
@@ -257,7 +263,7 @@ function App() {
             reservationData,
           );
           // Mettre à jour reservationCompleted dans sessionStorage
-          sessionStorage.setItem("lastSessionId", sessionId);
+          sessionStorage.setItem("lastSessionId", paymentId);
           toast({
             title: "Paiement réussi",
             description: message,
@@ -708,8 +714,6 @@ function App() {
   };
 
   const handleSubmit = async () => {
-    const stripe = await stripePromise;
-
     const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)
       .toString()
       .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
@@ -729,20 +733,21 @@ function App() {
             clientEmail: email,
             phoneNumber: formattedPhoneNumber,
           },
-          amount: 3000,
+          amount: 30,
           currency: "EUR",
         },
       );
 
-      const result = await stripe.redirectToCheckout({
-        sessionId: sessionResponse.data.id,
-      });
-
-      if (result.error) {
-        console.error("Erreur de redirection vers Checkout:", result.error);
+      const { paymentUrl, id } = sessionResponse.data;
+      if (id) localStorage.setItem("molliePaymentId", id);
+      if (paymentUrl) {
+        // Redirect to Mollie hosted checkout
+        window.location.href = paymentUrl;
+      } else {
+        console.error("No checkout URL returned from server");
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error creating payment:", error);
     }
   };
 
