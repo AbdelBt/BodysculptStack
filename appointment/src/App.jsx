@@ -214,10 +214,7 @@ function App() {
   useEffect(() => {
     const fetchReservationData = async () => {
       if (window.location.href.includes("success")) {
-        const storagePaymentId = localStorage.getItem("molliePaymentId");
-        const urlParams = new URLSearchParams(window.location.search);
-        const paymentId = urlParams.get("payment_id") || storagePaymentId;
-
+        const paymentId = localStorage.getItem("molliePaymentId");
         const lastSessionId = sessionStorage.getItem("lastSessionId");
 
         if (!paymentId) {
@@ -235,13 +232,6 @@ function App() {
             `https://bodysculptstack.onrender.com/success?payment_id=${paymentId}`,
           );
           const reservationData = response.data.reservation;
-
-          if (!reservationData) {
-            console.error(
-              "Aucune donnée de réservation retournée par /success",
-            );
-            return;
-          }
 
           // Formatage de la date pour affichage
           const formattedDate = new Date(reservationData.date);
@@ -738,10 +728,10 @@ function App() {
         },
       );
 
-      const { paymentUrl, id } = sessionResponse.data;
-      if (id) localStorage.setItem("molliePaymentId", id);
-      if (paymentUrl) {
-        // Redirect to Mollie hosted checkout
+      const { paymentUrl, id: paymentId } = sessionResponse.data;
+
+      if (paymentUrl && paymentId) {
+        localStorage.setItem("molliePaymentId", paymentId);
         window.location.href = paymentUrl;
       } else {
         console.error("No checkout URL returned from server");
