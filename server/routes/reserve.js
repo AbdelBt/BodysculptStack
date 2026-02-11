@@ -9,7 +9,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEmail = async (mailOptions) => {
     try {
-        const from = "Body Sculpt By Maya <noreply@bodysculptbymaya.com>";
+        const from = "Body Sculpt By Maya <bodysculptbymaya@bodysculptbymaya.com>";
 
         const response = await resend.emails.send({
             from,

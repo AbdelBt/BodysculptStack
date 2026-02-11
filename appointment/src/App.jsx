@@ -214,16 +214,10 @@ function App() {
   useEffect(() => {
     const fetchReservationData = async () => {
       if (window.location.href.includes("success")) {
-        const paymentId = localStorage.getItem("molliePaymentId");
-        const lastSessionId = sessionStorage.getItem("lastSessionId");
+        const paymentId = localStorage.getItem("paymentId");
 
         if (!paymentId) {
-          console.log("Aucun payment_id trouvé");
-          return;
-        }
-
-        if (lastSessionId === paymentId) {
-          console.log("Reservation déjà traitée pour ce payment_id");
+          console.log("Aucun payment_id trouvé dans l'URL");
           return;
         }
 
@@ -247,13 +241,6 @@ function App() {
 
           console.log("Reservation Data:", reservationData);
 
-          // Soumettre la réservation au backend
-          await axios.post(
-            "https://bodysculptstack.onrender.com/reserve",
-            reservationData,
-          );
-          // Mettre à jour reservationCompleted dans sessionStorage
-          sessionStorage.setItem("lastSessionId", paymentId);
           toast({
             title: "Paiement réussi",
             description: message,
@@ -261,16 +248,14 @@ function App() {
             className: "bg-[#e4d7cc]",
           });
 
-          // Mettre à jour les jours non disponibles
-          fetchUnavailableDays();
+          setTimeout(() => fetchUnavailableDays(), 1000);
         } catch (error) {
           console.error("Error fetching reservation data:", error);
-          // Gérer les erreurs de récupération des données de réservation
         }
       }
     };
 
-    const timer = setTimeout(fetchReservationData, 500); // Ajustez la durée du délai en millisecondes selon vos besoins
+    const timer = setTimeout(fetchReservationData, 500);
 
     return () => clearTimeout(timer);
   }, [toast]);
@@ -731,7 +716,7 @@ function App() {
       const { paymentUrl, id: paymentId } = sessionResponse.data;
 
       if (paymentUrl && paymentId) {
-        localStorage.setItem("molliePaymentId", paymentId);
+        localStorage.setItem("paymentId", paymentId);
         window.location.href = paymentUrl;
       } else {
         console.error("No checkout URL returned from server");
