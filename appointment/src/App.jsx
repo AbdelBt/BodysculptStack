@@ -153,13 +153,9 @@ function App() {
       rows.forEach((r) => {
         const email = r.employee_email;
         if (!map[email]) map[email] = new Set();
-        const svc = (r.service_name || "")
-          .toString()
-          .trim()
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "");
-        // fallback: if normalized svc is empty, store original
+
+        const svc = r.service_name || "";
+
         map[email].add(svc || r.service_name || "");
       });
       setEmployeeServicesMap(map);
@@ -296,12 +292,8 @@ function App() {
         );
         // Normalize names: trim, lowercase and remove diacritics for matching
         const normalized = (response.data || []).map((s) => {
-          const original = s.name ? s.name.toString().trim() : "";
-          const nameLower = original.toLowerCase();
-          const nameNorm = nameLower
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "");
-          return { ...s, name: original, nameLower, nameNorm };
+          const original = s.name ? s.name.toString() : "";
+          return { ...s, name: original };
         });
         setServices(normalized);
       } catch (error) {
@@ -419,18 +411,13 @@ function App() {
     const availableEmployees = [];
 
     const isAnyEmployeeAvailable = employeeIds.some((employeeId) => {
-      // Si un service est demandé, ignorer les employés qui ne le fournissent pas
       if (serviceName) {
         const svcSet = employeeServicesMap[employeeId];
         if (!svcSet) return false;
-        const serviceNorm = (serviceName || service || "")
-          .toString()
-          .trim()
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "");
-        // allow match against normalized stored names or original name as fallback
-        if (!svcSet.has(serviceNorm) && !svcSet.has(serviceName)) return false;
+
+        const serviceRaw = (serviceName || service || "").toString();
+
+        if (!svcSet.has(serviceRaw)) return false;
       }
       const hasWeeklyDayOff = employeeDaysOffWeek.some((dayOffWeek) => {
         const dayOfWeekMapping = {
